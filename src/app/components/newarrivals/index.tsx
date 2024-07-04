@@ -1,23 +1,23 @@
-import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 import localFont from "next/font/local";
-import tshirtwithdetails from "../../../public/Frame 32.png";
-import skinnyjeans from "../../../public/Frame 33.png";
-import checkeredshirt from "../../../public/Frame 34.png";
-import SLEEVESTRIPEDTSHIRT from "../../../public/Frame 38.png";
-import frame39 from "../../../public/Frame 39.png";
-import frame40 from "../../../public/Frame 40.png";
-import frame41 from "../../../public/Frame 41.png";
-import frame42 from "../../../public/Frame 42.png";
+import Image from "next/image";
+import Link from "next/link";
+import tshirtwithdetails from "../../../../public/Frame 32.png";
+import skinnyjeans from "../../../../public/Frame 33.png";
+import checkeredshirt from "../../../../public/Frame 34.png";
+import SLEEVESTRIPEDTSHIRT from "../../../../public/Frame 38.png";
+import frame39 from "../../../../public/Frame 39.png";
+import frame40 from "../../../../public/Frame 40.png";
+import frame41 from "../../../../public/Frame 41.png";
+import frame42 from "../../../../public/Frame 42.png";
 
 const integralCF = localFont({
-  src: "../../fonts/IntegralCF/IntegralCF-Bold.ttf",
+  src: "../../../fonts/IntegralCF/IntegralCF-Bold.ttf",
   display: "swap",
 });
 
 const satoshi = localFont({
-  src: "../../fonts/satoshi/Satoshi-Variable.ttf",
+  src: "../../../fonts/satoshi/Satoshi-Variable.ttf",
   display: "swap",
 });
 
@@ -83,7 +83,7 @@ const topSellings = [
   },
 ];
 
-export default function Page() {
+export default function NewArrivals() {
   return (
     <>
       <section className="mt-24">
@@ -94,6 +94,7 @@ export default function Page() {
             >
               NEW ARRIVALS
             </h1>
+
             <div className="flex items-center justify-between gap-6">
               {newArrivals.map((item) => (
                 <div
@@ -103,7 +104,7 @@ export default function Page() {
                   <Link href={`/details/${item.id}`} className="cursor-pointer">
                     <Image src={item.imgUrl} alt={item.name} />
                   </Link>
-                  <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                  <h4 className=" text-[20px] leading-[27px] font-bold text-black">
                     {item.name}
                   </h4>
                   <div className="flex items-center justify-between">
@@ -147,6 +148,7 @@ export default function Page() {
             >
               TOP SELLING
             </h1>
+
             <div className="flex items-center justify-between gap-6">
               {topSellings.map((item) => (
                 <div
@@ -156,7 +158,7 @@ export default function Page() {
                   <Link href={`/details/${item.id}`} className="cursor-pointer">
                     <Image src={item.imgUrl} alt={item.name} />
                   </Link>
-                  <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                  <h4 className=" text-[20px] leading-[27px] font-bold text-black">
                     {item.name}
                   </h4>
                   <div className="flex items-center justify-between">

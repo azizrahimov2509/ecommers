@@ -7,16 +7,6 @@ import Footer from "./components/footer";
 
 const inter = Roboto_Mono({ subsets: ["latin"] });
 
-const integralCF = localFont({
-  src: "../fonts/IntegralCF/IntegralCF-Bold.ttf",
-  display: "swap",
-});
-
-const satoshi = localFont({
-  src: "../fonts/satoshi/Satoshi-Variable.ttf",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: "SHOP.CO",
   description: "FIND CLOTHES THAT MATCHES YOUR STYLE",
@@ -28,11 +18,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="light">
       <body className={inter.className}>
         <Header />
         <main>{children}</main>
-
         <Footer />
       </body>
     </html>

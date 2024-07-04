@@ -12,14 +12,10 @@
   body {
     @apply h-full flex flex-col;
   }
-  main {
-    @apply flex-grow;
-  }
 }
 
 @layer components {
   .container {
     @apply w-[1240px] mx-auto;
-    @apply h-[50px];
   }
 }
