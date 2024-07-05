@@ -17,9 +17,12 @@ export default function Header() {
     <header className="pt-7 pb-7">
       <div className="container navbar bg-base-100">
         <div className="container mx-auto flex justify-between items-center p-4">
-          <h1 className={`text-3xl font-bold pb-1 ${integralCF.className}`}>
+          <Link
+            href={"/"}
+            className={`text-3xl font-bold pb-1 ${integralCF.className}`}
+          >
             SHOP.CO
-          </h1>
+          </Link>
           <nav>
             <ul
               className={`flex space-x-4 items-center justify-between ${satoshi.className}`}
