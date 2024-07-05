@@ -117,7 +117,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
   return (
     <div className="container mx-auto py-16">
       <section className="flex flex-col items-center justify-center">
-        <div className="w-[1100px] h-[700px] mx-auto p-8 bg-white shadow-md rounded-lg">
+        <div className="w-[1100px] h-[560px] mx-auto p-8 bg-white shadow-md rounded-lg">
           <Link
             href="/"
             className={`text-white mb-4 inline-block text-lg bg-slate-900 p-4 rounded-3xl ${satoshi.className} `}
@@ -129,9 +129,9 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
               <Image
                 src={product.image}
                 alt={product.name}
-                className="w-[444px] h-[450px] mb-4 rounded-lg"
-                width={444}
-                height={450}
+                className=" mb-4 rounded-lg"
+                width={460}
+                height={460}
               />
             </div>
             <div>
