@@ -14,7 +14,7 @@ const satoshi = localFont({
 
 export default function Header() {
   return (
-    <header className="pt-7 pb-7">
+    <header className="pt-1 pb-1">
       <div className="container navbar bg-base-100">
         <div className="container mx-auto flex justify-between items-center p-4">
           <Link
