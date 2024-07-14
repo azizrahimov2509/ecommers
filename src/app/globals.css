@@ -12,6 +12,9 @@
   body {
     @apply h-full flex flex-col;
   }
+  main {
+    @apply flex-grow;
+  }
 }
 
 @layer components {

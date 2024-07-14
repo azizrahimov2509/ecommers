@@ -2,85 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import localFont from "next/font/local";
-
-import tshirtwithdetails from "../../../../public/Frame 32.png";
-import skinnyjeans from "../../../../public/Frame 33.png";
-import checkeredshirt from "../../../../public/Frame 34.png";
-import SLEEVESTRIPEDTSHIRT from "../../../../public/Frame 38.png";
-import frame39 from "../../../../public/Frame 39.png";
-import frame40 from "../../../../public/Frame 40.png";
-import frame41 from "../../../../public/Frame 41.png";
-import frame42 from "../../../../public/Frame 42.png";
-import { notFound } from "next/navigation";
-
-const products = [
-  {
-    id: "1",
-    name: "T-SHIRT WITH TAPE DETAILS",
-    description: "This T-shirt features stylish tape details.",
-    price: 120,
-    image: tshirtwithdetails,
-    rating: 4.5,
-  },
-  {
-    id: "2",
-    name: "SKINNY FIT JEANS",
-    description: "These jeans offer a comfortable skinny fit.",
-    price: 240,
-    image: skinnyjeans,
-    rating: 4.2,
-  },
-  {
-    id: "3",
-    name: "CHECKERED SHIRT",
-    description: "A classic checkered shirt for all occasions.",
-    price: 180,
-    image: checkeredshirt,
-    rating: 4.8,
-  },
-  {
-    id: "4",
-    name: "SLEEVE STRIPED T-SHIRT",
-    description: "A T-shirt with stylish sleeve stripes.",
-    price: 130,
-    image: SLEEVESTRIPEDTSHIRT,
-    rating: 4.3,
-  },
-  {
-    id: "5",
-    name: "VERTICAL STRIPED SHIRT",
-    description: "A vertical striped shirt for a sharp look.",
-    price: 212,
-    image: frame39,
-    rating: 4.7,
-  },
-  {
-    id: "6",
-    name: "COURAGE GRAPHIC T-SHIRT",
-    description: "A T-shirt featuring a bold graphic design.",
-    price: 145,
-    image: frame40,
-    rating: 4.6,
-  },
-  {
-    id: "7",
-    name: "LOOSE FIT BERMUDA SHORTS",
-    description: "Comfortable and loose fit Bermuda shorts.",
-    price: 80,
-    image: frame41,
-    rating: 4.1,
-  },
-  {
-    id: "8",
-    name: "FADED SKINNY JEANS",
-    description: "Stylish faded skinny jeans for everyday wear.",
-    price: 210,
-    image: frame42,
-    rating: 4.4,
-  },
-];
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  limit,
+} from "firebase/firestore";
+import { db } from "@/farebase/config";
 
 const integralCF = localFont({
   src: "../../../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -92,21 +24,60 @@ const satoshi = localFont({
   display: "swap",
 });
 
+interface Product {
+  id: string;
+  name: string;
+  photo: string[];
+  price: number;
+  rating: number;
+  description: string;
+}
+
 interface DetailsCarsProps {
-  id: string | number;
+  id: string;
 }
 
 const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
-  const product = products.find((p) => p.id === id);
-
+  const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("red");
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
-  if (!product) {
-    notFound();
-  }
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const docRef = doc(db, "products", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
+        } else {
+          console.error("No such document!");
+        }
+      } catch (error) {
+        console.error("Error getting document:", error);
+      }
+    };
 
-  const handleQuantityChange = (operation: string) => {
+    const fetchRelatedProducts = async () => {
+      try {
+        const productsCollection = collection(db, "products");
+        const productsQuery = query(productsCollection, limit(4));
+        const querySnapshot = await getDocs(productsQuery);
+        const products = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Product[];
+        setRelatedProducts(products);
+      } catch (error) {
+        console.error("Error getting related products:", error);
+      }
+    };
+
+    fetchProduct();
+    fetchRelatedProducts();
+  }, [id]);
+
+  const handleQuantityChange = (operation: "decrease" | "increase") => {
     setQuantity((prev) => {
       if (operation === "decrease" && prev > 1) return prev - 1;
       if (operation === "increase") return prev + 1;
@@ -114,27 +85,31 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
     });
   };
 
+  if (!product) {
+    return <div className="container">Loading...</div>;
+  }
+
   return (
     <div className="container mx-auto py-16">
       <section className="flex flex-col items-center justify-center">
-        <div className="w-[1100px] h-[560px] mx-auto p-8 bg-white shadow-md rounded-lg">
+        <div className="w-full p-8 bg-white shadow-md rounded-lg">
           <Link
             href="/"
             className={`text-white mb-4 inline-block text-lg bg-slate-900 p-4 rounded-3xl ${satoshi.className} `}
           >
             &larr; Back to Home
           </Link>
-          <div className="flex items-start justify-between gap-24">
-            <div>
+          <div className="flex flex-col md:flex-row items-start gap-8">
+            <div className="md:w-1/2">
               <Image
-                src={product.image}
+                src={product.photo[0]}
                 alt={product.name}
-                className=" mb-4 rounded-lg"
-                width={460}
-                height={460}
+                className="mb-4 rounded-lg"
+                width={400}
+                height={400}
               />
             </div>
-            <div>
+            <div className="md:w-1/2 flex flex-col items-start gap-5 ">
               <h1 className={`text-4xl font-bold mb-4 ${integralCF.className}`}>
                 {product.name}
               </h1>
@@ -163,7 +138,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                 </span>
               </div>
               <p
-                className={`text-xl font-semibold mb-4 ${satoshi.className} text-[32px] leading-[43px] font-bold`}
+                className={`mb-4 ${satoshi.className} text-[32px] leading-[43px] font-bold`}
               >
                 ${product.price}
               </p>
@@ -172,7 +147,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
               >
                 {product.description}
               </p>
-              {/* Круглые цветные иконки */}
+
               <div className="flex gap-4 mb-6">
                 {["red", "green", "blue"].map((color) => (
                   <div
@@ -183,11 +158,11 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                     style={{ backgroundColor: color }}
                     onClick={() => setSelectedColor(color)}
                   >
-                    {color === selectedColor && "V"}
+                    {color === selectedColor && "✔"}
                   </div>
                 ))}
               </div>
-              {/* Кнопки для размеров */}
+
               <div className="flex gap-4 mb-6">
                 {["Small", "Medium", "Large", "X-Large"].map((size) => (
                   <button
@@ -199,9 +174,9 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                 ))}
               </div>
               <div className="flex items-center gap-4 mb-6">
-                <div className="flex w-[170px] h-[52px]  gap-2 bg-slate-300 rounded-3xl p-3 items-center justify-between">
+                <div className="flex w-[170px] h-[52px] gap-2 bg-slate-300 rounded-3xl p-3 items-center justify-between">
                   <button
-                    className="px-3 py-1  text-gray-700  focus:outline-none focus:ring-2 focus:ring-gray-400 text-2xl"
+                    className="px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 text-2xl"
                     onClick={() => handleQuantityChange("decrease")}
                   >
                     -
@@ -214,7 +189,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                     +
                   </button>
                 </div>
-                <button className=" w-[400px] h-[52px] px-4 py-2 bg-black rounded-3xl text-white text-sm hover:bg-white hover:text-black border-black border-2 focus:outline-none focus:ring-2 focus:ring-green-400">
+                <button className="w-[400px] h-[52px] px-4 py-2 bg-black rounded-3xl text-white text-sm hover:bg-white hover:text-black border-black border-2 focus:outline-none focus:ring-2 focus:ring-green-400">
                   Add to Cart
                 </button>
               </div>
@@ -232,16 +207,22 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
               You might also like
             </h1>
 
-            <div className="flex items-center justify-between gap-6">
-              {products.slice(4).map((item) => (
+            <div className="flex flex-wrap justify-center gap-6">
+              {relatedProducts.map((item) => (
                 <div
                   key={item.id}
                   className={`flex flex-col items-start justify-center gap-3 ${satoshi.className}`}
                 >
                   <Link href={`/details/${item.id}`} className="cursor-pointer">
-                    <Image src={item.image} alt={item.name} />
+                    <Image
+                      src={item.photo[0] || "/placeholder.png"}
+                      alt={item.name}
+                      width={290}
+                      height={294}
+                      className="h-72"
+                    />
                   </Link>
-                  <h4 className=" text-[20px] leading-[27px] font-bold text-black">
+                  <h4 className="text-[20px] leading-[27px] font-bold text-black">
                     {item.name}
                   </h4>
                   <div className="flex items-center justify-between">
@@ -260,55 +241,17 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                       {item.rating}/<span className="text-gray-600">5</span>
                     </p>
                   </div>
-                  <h3 className="text-[24px] leading-[37px] font-bold">
-                    ${item.price}
-                  </h3>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-[#272D2F] text-2xl font-bold leading-7">
+                      ${item.price}
+                    </span>
+                    <button className="w-[72px] h-[40px] px-2 py-2 bg-[#A5A5A5] rounded-[10px] text-sm text-white">
+                      Add
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
-            <div>
-              <button
-                className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500 `}
-              >
-                View All
-              </button>
-            </div>
-          </div>
-          <hr />
-        </div>
-      </section>
-
-      <section className="">
-        <div className="container">
-          <div className="text-white bg-black rounded-3xl p-14 flex items-center justify-between gap-28">
-            <h1
-              className={`${integralCF.className} text-[40px] leading-[45px] font-700 `}
-            >
-              STAY UPTO DATE ABOUT OUR LATEST OFFERS
-            </h1>
-
-            <form className="flex flex-col gap-6 relative">
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                className={`rounded-3xl p-4 w-[349px] h-[48px] ${satoshi.className} text-base text-black pl-8`}
-              />
-
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 absolute top-3.5 left-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                stroke="black"
-              >
-                <path d="M2 3a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V3zm2-.5v4.943l6 3.499 6-3.499V2.5H4zm0 5.208V17.5h12V8.708l-6 3.5-6-3.5z" />
-              </svg>
-              <button
-                className={`w-[349px] h-[48px] rounded-3xl bg-white border-e-2 border-black ${satoshi.className} text-black text-base  font-bold`}
-              >
-                Subscribe to Newsletter
-              </button>
-            </form>
           </div>
         </div>
       </section>

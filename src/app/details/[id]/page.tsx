@@ -1,12 +1,7 @@
 import DetailsCars from "@/app/components/detailscard";
-import React from "react";
 
-interface ProductDetailProps {
-  params: {
-    id: string | number;
-  };
-}
-
-export default function Page({ params }: ProductDetailProps) {
+const Page = ({ params }: { params: { id: string } }) => {
   return <DetailsCars id={params.id} />;
-}
+};
+
+export default Page;

@@ -1,15 +1,17 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import localFont from "next/font/local";
-import tshirtwithdetails from "../../../public/Frame 32.png";
-import skinnyjeans from "../../../public/Frame 33.png";
-import checkeredshirt from "../../../public/Frame 34.png";
-import SLEEVESTRIPEDTSHIRT from "../../../public/Frame 38.png";
-import frame39 from "../../../public/Frame 39.png";
-import frame40 from "../../../public/Frame 40.png";
-import frame41 from "../../../public/Frame 41.png";
-import frame42 from "../../../public/Frame 42.png";
+import {
+  collection,
+  getDocs,
+  query,
+  limit,
+  startAfter,
+} from "firebase/firestore";
+import { db } from "@/farebase/config";
 
 const integralCF = localFont({
   src: "../../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -21,69 +23,54 @@ const satoshi = localFont({
   display: "swap",
 });
 
-const newArrivals = [
-  {
-    id: "1",
-    name: "T-SHIRT WITH TAPE DETAILS",
-    rating: 4.5,
-    imgUrl: tshirtwithdetails,
-    price: 120,
-  },
-  {
-    id: "2",
-    name: "SKINNY FIT JEANS",
-    rating: 3.5,
-    imgUrl: skinnyjeans,
-    price: 240,
-  },
-  {
-    id: "3",
-    name: "CHECKERED SHIRT",
-    rating: 4.5,
-    imgUrl: checkeredshirt,
-    price: 180,
-  },
-  {
-    id: "4",
-    name: "SLEEVE STRIPED T-SHIRT",
-    rating: 4.5,
-    imgUrl: SLEEVESTRIPEDTSHIRT,
-    price: 130,
-  },
-];
+interface Product {
+  id: string;
+  name: string;
+  photo: string[];
+  price: number;
+  rating: number;
+}
 
-const topSellings = [
-  {
-    id: "5",
-    name: "VERTICAL STRIPED SHIRT",
-    rating: 5,
-    imgUrl: frame39,
-    price: 212,
-  },
-  {
-    id: "6",
-    name: "COURAGE GRAPHIC T-SHIRT",
-    rating: 4,
-    imgUrl: frame40,
-    price: 145,
-  },
-  {
-    id: "7",
-    name: "LOOSE FIT BERMUDA SHORTS",
-    rating: 3,
-    imgUrl: frame41,
-    price: 80,
-  },
-  {
-    id: "8",
-    name: "FADED SKINNY JEANS",
-    rating: 4.5,
-    imgUrl: frame42,
-    price: 210,
-  },
-];
+export default function Details() {
+  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+  const [topSellings, setTopSellings] = useState<Product[]>([]);
 
-export default function Page() {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const productsRef = collection(db, "products");
+
+        const newArrivalsQuery = query(productsRef, limit(4));
+        const newArrivalsSnapshot = await getDocs(newArrivalsQuery);
+        const newArrivalsData = newArrivalsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Product[];
+
+        setNewArrivals(newArrivalsData);
+
+        const lastDoc =
+          newArrivalsSnapshot.docs[newArrivalsSnapshot.docs.length - 1];
+        const topSellingsQuery = query(
+          productsRef,
+          startAfter(lastDoc),
+          limit(4)
+        );
+        const topSellingsSnapshot = await getDocs(topSellingsQuery);
+        const topSellingsData = topSellingsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Product[];
+
+        setTopSellings(topSellingsData);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
     <>
       <section className="mt-24">
@@ -101,7 +88,13 @@ export default function Page() {
                   className={`flex flex-col items-start justify-center gap-3 ${satoshi.className}`}
                 >
                   <Link href={`/details/${item.id}`} className="cursor-pointer">
-                    <Image src={item.imgUrl} alt={item.name} />
+                    <Image
+                      src={item.photo[0] || "/placeholder.png"}
+                      alt={item.name}
+                      width={290}
+                      height={294}
+                      className="h-72"
+                    />
                   </Link>
                   <h4 className="text-[20px] leading-[27px] font-bold text-black">
                     {item.name}
@@ -151,10 +144,16 @@ export default function Page() {
               {topSellings.map((item) => (
                 <div
                   key={item.id}
-                  className={`flex flex-col items-start justify-center gap-3 ${satoshi.className}`}
+                  className={`flex flex-col items-start justify-center gap-3  ${satoshi.className} w-[290px]`}
                 >
                   <Link href={`/details/${item.id}`} className="cursor-pointer">
-                    <Image src={item.imgUrl} alt={item.name} />
+                    <Image
+                      src={item.photo[0] || "/placeholder.png"}
+                      alt={item.name}
+                      width={290}
+                      height={294}
+                      className="h-72"
+                    />
                   </Link>
                   <h4 className="text-[20px] leading-[27px] font-bold text-black">
                     {item.name}

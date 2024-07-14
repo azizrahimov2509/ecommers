@@ -8,6 +8,7 @@ import gucci from "../../public/Gucci.png";
 import prada from "../../public/Prada.png";
 import NewArrivals from "./components/newarrivals";
 import StyleDress from "./components/styleofdress";
+import Details from "./details/page";
 
 const integralCF = localFont({
   src: "../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -115,8 +116,7 @@ export default function Home() {
         </div>
       </section>
 
-      <NewArrivals />
-      <StyleDress />
+      <Details />
     </>
   );
 }
