@@ -1,3 +1,4 @@
+
 "use client";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";
@@ -5,6 +6,7 @@ import React, { useState } from "react";
 import { auth } from "@/farebase/config";
 import { useRouter } from "next/navigation";
 import { message } from "antd";
+import { useAuth } from "../components/Authcontent/authcontent";
 
 interface LoginData {
   email: string;
@@ -13,6 +15,7 @@ interface LoginData {
 
 function Login() {
   const router = useRouter();
+  const { login } = useAuth();
   const [loginData, setLoginData] = useState<LoginData>({
     email: "",
     password: "",
@@ -71,8 +74,9 @@ function Login() {
       );
       const user = userCredential.user;
       localStorage.setItem("user", JSON.stringify(user));
+      login();
       router.push("/");
-      message.success("Welcome site!");
+      message.success("Welcome to the site!");
     } catch (error: any) {
       const errorCode = error.code;
       let errorMessage = "Failed to sign in. Please check your credentials.";
@@ -84,8 +88,6 @@ function Login() {
       }
 
       setErrors({ ...errors, firebase: errorMessage });
-    } finally {
-      setLoginData({ email: "", password: "" });
     }
   };
 
