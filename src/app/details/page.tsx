@@ -190,6 +190,41 @@ export default function Details() {
           </div>
         </div>
       </section>
+
+      <section className="">
+        <div className="container">
+          <div className="text-white bg-black rounded-3xl p-14 flex items-center justify-between gap-28">
+            <h1
+              className={`${integralCF.className} text-[40px] leading-[45px] font-700 `}
+            >
+              STAY UPTO DATE ABOUT OUR LATEST OFFERS
+            </h1>
+
+            <form className="flex flex-col gap-6 relative">
+              <input
+                type="email"
+                placeholder="Enter your email address"
+                className={`rounded-3xl p-4 w-[349px] h-[48px] ${satoshi.className} text-base text-black pl-8`}
+              />
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 absolute top-3.5 left-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                stroke="black"
+              >
+                <path d="M2 3a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V3zm2-.5v4.943l6 3.499 6-3.499V2.5H4zm0 5.208V17.5h12V8.708l-6 3.5-6-3.5z" />
+              </svg>
+              <button
+                className={`w-[349px] h-[48px] rounded-3xl bg-white border-e-2 border-black ${satoshi.className} text-black text-base  font-bold`}
+              >
+                Subscribe to Newsletter
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

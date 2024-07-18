@@ -1,28 +1,28 @@
-import type { Metadata } from "next";
+"use client";
+
+import React from "react";
 import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
-import localFont from "next/font/local";
-import Header from "./components/header";
-import Footer from "./components/footer";
+import Layout from "./home/page";
+import { usePathname } from "next/navigation";
 
 const inter = Roboto_Mono({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "SHOP.CO",
-  description: "FIND CLOTHES THAT MATCHES YOUR STYLE",
-};
-
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const pathname = usePathname();
+
   return (
     <html lang="en" data-theme="light">
       <body className={inter.className}>
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        {pathname === "/login" || pathname === "/signup" ? (
+          children
+        ) : (
+          <Layout>{children}</Layout>
+        )}
       </body>
     </html>
   );

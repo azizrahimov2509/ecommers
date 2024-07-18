@@ -13,6 +13,8 @@ import {
   limit,
 } from "firebase/firestore";
 import { db } from "@/farebase/config";
+import { useRouter } from "next/navigation";
+import { message } from "antd";
 
 const integralCF = localFont({
   src: "../../../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -38,6 +40,7 @@ interface DetailsCarsProps {
 }
 
 const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("red");
@@ -83,6 +86,19 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
       if (operation === "increase") return prev + 1;
       return prev;
     });
+  };
+
+  const handleAddToCart = () => {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    if (!user) {
+      message.error("Please login to add items to your cart.");
+      router.push("/login");
+      return;
+    }
+
+    // Add to cart functionality here
+    // For demonstration, we'll just show a success message
+    message.success("Item added to cart!");
   };
 
   if (!product) {
@@ -189,7 +205,10 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                     +
                   </button>
                 </div>
-                <button className="w-[400px] h-[52px] px-4 py-2 bg-black rounded-3xl text-white text-sm hover:bg-white hover:text-black border-black border-2 focus:outline-none focus:ring-2 focus:ring-green-400">
+                <button
+                  className="w-[400px] h-[52px] px-4 py-2 bg-black rounded-3xl text-white text-sm hover:bg-white hover:text-black border-black border-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  onClick={handleAddToCart}
+                >
                   Add to Cart
                 </button>
               </div>
@@ -222,36 +241,50 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                       className="h-72"
                     />
                   </Link>
-                  <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                  <h4 className="text-[20px] leading-[35px] font-bold">
                     {item.name}
                   </h4>
-                  <div className="flex items-center justify-between">
-                    <div className="rating">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <input
-                          key={star}
-                          type="radio"
-                          name={`rating-${item.id}`}
-                          className="mask mask-star-2 bg-orange-400"
-                          defaultChecked={item.rating >= star}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-black">
-                      {item.rating}/<span className="text-gray-600">5</span>
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-[#272D2F] text-2xl font-bold leading-7">
-                      ${item.price}
-                    </span>
-                    <button className="w-[72px] h-[40px] px-2 py-2 bg-[#A5A5A5] rounded-[10px] text-sm text-white">
-                      Add
-                    </button>
-                  </div>
+                  <span className="text-[22px] leading-[20px] font-bold">
+                    ${item.price}
+                  </span>
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="">
+        <div className="container">
+          <div className="text-white bg-black rounded-3xl p-14 flex items-center justify-between gap-28">
+            <h1
+              className={`${integralCF.className} text-[40px] leading-[45px] font-700 `}
+            >
+              STAY UPTO DATE ABOUT OUR LATEST OFFERS
+            </h1>
+
+            <form className="flex flex-col gap-6 relative">
+              <input
+                type="email"
+                placeholder="Enter your email address"
+                className={`rounded-3xl p-4 w-[349px] h-[48px] ${satoshi.className} text-base text-black pl-8`}
+              />
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 absolute top-3.5 left-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                stroke="black"
+              >
+                <path d="M2 3a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V3zm2-.5v4.943l6 3.499 6-3.499V2.5H4zm0 5.208V17.5h12V8.708l-6 3.5-6-3.5z" />
+              </svg>
+              <button
+                className={`w-[349px] h-[48px] rounded-3xl bg-white border-e-2 border-black ${satoshi.className} text-black text-base  font-bold`}
+              >
+                Subscribe to Newsletter
+              </button>
+            </form>
           </div>
         </div>
       </section>

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import React from "react";
 import localFont from "next/font/local";
+import { signOut } from "firebase/auth";
+import { auth } from "@/farebase/config";
 
 const integralCF = localFont({
   src: "../../../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -13,6 +15,16 @@ const satoshi = localFont({
 });
 
 export default function Header() {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
     <header className="pt-1 pb-1">
       <div className="container navbar bg-base-100">
@@ -41,16 +53,15 @@ export default function Header() {
               </li>
             </ul>
           </nav>
-          <div className=" relative">
+          <div className="relative">
             <input
               type="text"
               placeholder="Search for products..."
               className="input input-bordered w-[577px] h-[48px] pl-7 pr-3 rounded-3xl bg-[#F0F0F0]"
             />
-
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 left-2  top-3.5 absolute z-10"
+              className="h-5 w-5 left-2 top-3.5 absolute z-10"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -119,7 +130,9 @@ export default function Header() {
                 <a>Settings</a>
               </li>
               <li>
-                <a>Logout</a>
+                <button onClick={handleLogout} className="w-full text-left">
+                  Logout
+                </button>
               </li>
             </ul>
           </div>
