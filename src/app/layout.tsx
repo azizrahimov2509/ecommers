@@ -2,7 +2,7 @@
 import React from "react";
 import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
-import Layout from "./home/page";
+import Layout from "antd/es/layout/layout";
 import { usePathname } from "next/navigation";
 
 const inter = Roboto_Mono({ subsets: ["latin"] });
