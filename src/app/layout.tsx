@@ -8,6 +8,7 @@ import Header from "./components/header";
 import Footer from "./components/footer";
 import { AuthProvider, useAuth } from "./components/Authcontent/authcontent";
 import Link from "next/link";
+import Login from "./login/page";
 
 const inter = Roboto_Mono({ subsets: ["latin"] });
 
@@ -39,7 +40,7 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) {
     return (
       <div className="container">
-        Please log in to see this content. <Link href="/login">Login</Link>
+        <Login />
       </div>
     );
   }
