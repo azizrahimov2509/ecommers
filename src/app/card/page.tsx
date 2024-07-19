@@ -128,7 +128,7 @@ const Cart: React.FC = () => {
   }
 
   if (!cartItems.length) {
-    return <div className="container mx-auto p-4">Your cart is empty.</div>;
+    return <div className="container mx-auto p-4 ">Your cart is empty.</div>;
   }
 
   return (
@@ -158,7 +158,7 @@ const Cart: React.FC = () => {
                   <p className="text-xl font-bold">${item.price}</p>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="flex w-[170px] h-[52px] gap-2 bg-slate-300 rounded-3xl p-3 items-center justify-between">
+                  <div className="flex w-[170px] h-[52px] gap-2 bg-slate-300 rounded-3xl p-3 items-center ml-3 justify-between">
                     <button
                       className="px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 text-2xl"
                       onClick={() => handleQuantityChange(item.id, "decrease")}
@@ -174,23 +174,10 @@ const Cart: React.FC = () => {
                     </button>
                   </div>
                   <button
-                    className="btn btn-circle btn-outline btn-error"
+                    className="btn  btn-outline btn-error"
                     onClick={() => removeItem(item.id)}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+                    Delete All
                   </button>
                 </div>
               </div>
