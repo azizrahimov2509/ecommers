@@ -13,7 +13,6 @@ interface CartItem {
   price: number;
   quantity: number;
   color: string;
-  size: string;
 }
 
 const Cart: React.FC = () => {
@@ -49,7 +48,7 @@ const Cart: React.FC = () => {
     };
 
     fetchCartItems();
-  }, []);
+  }, [setCartItems]);
 
   useEffect(() => {
     const calculateTotals = () => {
@@ -95,7 +94,7 @@ const Cart: React.FC = () => {
     };
 
     updateFirestore();
-  }, []);
+  }, [cartItems]);
 
   const handleQuantityChange = (
     itemId: string,
@@ -124,130 +123,107 @@ const Cart: React.FC = () => {
   }
 
   if (!cartItems.length) {
-    return (
-      <div className="container mx-auto p-4 text-xl text-red-700 text-center">
-        Your cart is empty.
-      </div>
-    );
+    return <div className="container mx-auto p-4">Your cart is empty.</div>;
   }
 
   return (
-    <div className="container  p-4">
+    <div className="container mx-auto p-4">
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full lg:w-3/4">
           <h1 className="text-4xl font-bold mb-8">YOUR CART</h1>
-          <div className=" flex flex-row items-start gap-10 w-[1100px]">
-            {" "}
-            <div className="space-y-4">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between border p-4 rounded-lg"
-                >
-                  <Image
-                    src={item.photo}
-                    alt={item.name}
-                    width={96}
-                    height={96}
-                    className="object-cover"
-                  />
-                  <div className="flex-grow px-4">
-                    <h2 className="text-xl font-bold">{item.name}</h2>
-                    <p>
-                      Color: {item.color}{" "}
-                      <span
-                        style={{
-                          backgroundColor: item.color,
-                          width: "15px",
-                          height: "15px",
-                          display: "inline-block",
-                          borderRadius: "50%",
-                        }}
-                      ></span>
-                    </p>
-                    <p>Quantity: {item.quantity}</p>
-                    <p>Size: {item.size}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold">${item.price}</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="flex w-[170px] h-[52px] gap-2 bg-slate-300 rounded-3xl p-2 ml-2 items-center justify-between">
-                      <button
-                        className="px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 text-2xl"
-                        onClick={() =>
-                          handleQuantityChange(item.id, "decrease")
-                        }
-                      >
-                        -
-                      </button>
-                      <span className="text-lg font-bold">{item.quantity}</span>
-                      <button
-                        className="px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 text-2xl"
-                        onClick={() =>
-                          handleQuantityChange(item.id, "increase")
-                        }
-                      >
-                        +
-                      </button>
-                    </div>
+          <div className="space-y-4">
+            {cartItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between border p-4 rounded-lg"
+              >
+                <Image
+                  src={item.photo}
+                  alt={item.name}
+                  width={96}
+                  height={96}
+                  className="object-cover"
+                />
+                <div className="flex-grow px-4">
+                  <h2 className="text-xl font-bold">{item.name}</h2>
+                  <p>Color: {item.color}</p>
+                  <p>Quantity: {item.quantity}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-bold">${item.price}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="flex w-[170px] h-[52px] gap-2 bg-slate-300 rounded-3xl p-3 items-center justify-between">
                     <button
-                      className="btn btn-circle btn-outline btn-error"
-                      onClick={() => removeItem(item.id)}
+                      className="px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 text-2xl"
+                      onClick={() => handleQuantityChange(item.id, "decrease")}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        className="w-6 h-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
+                      -
+                    </button>
+                    <span className="text-lg font-bold">{item.quantity}</span>
+                    <button
+                      className="px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 text-2xl"
+                      onClick={() => handleQuantityChange(item.id, "increase")}
+                    >
+                      +
                     </button>
                   </div>
+                  <button
+                    className="btn btn-circle btn-outline btn-error"
+                    onClick={() => removeItem(item.id)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
                 </div>
-              ))}
-            </div>
-            <div className="w-full lg:w-1/4">
-              <div className="border p-8 rounded-lg">
-                <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-red-500">
-                    <span>Discount (-20%)</span>
-                    <span>-${discount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Delivery Fee</span>
-                    <span>${deliveryFee.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between font-bold">
-                    <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <input
-                    type="text"
-                    placeholder="Add promo code"
-                    className="input input-bordered w-full"
-                  />
-                  <button className="btn btn-primary w-full mt-2">Apply</button>
-                </div>
-                <button className="btn btn-block btn-primary mt-4">
-                  Go to Checkout
-                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="w-full lg:w-1/4">
+          <div className="border p-4 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-red-500">
+                <span>Discount (-20%)</span>
+                <span>-${discount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Delivery Fee</span>
+                <span>${deliveryFee.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
               </div>
             </div>
+            <div className="mt-4">
+              <input
+                type="text"
+                placeholder="Add promo code"
+                className="input input-bordered w-full"
+              />
+              <button className="btn btn-primary w-full mt-2">Apply</button>
+            </div>
+            <button className="btn btn-block btn-primary mt-4">
+              Go to Checkout
+            </button>
           </div>
         </div>
       </div>
