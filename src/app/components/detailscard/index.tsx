@@ -190,24 +190,26 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                 ${product.price}
               </p>
               <p
-                className={`mb-6 text-base leading-6 text-neutral-400 ${satoshi.className}`}
+                className={`mb-6 text-lg leading-6 text-neutral-500 ${satoshi.className}`}
               >
                 {product.description}
               </p>
 
               <div className="flex gap-4 mb-6">
-                {["red", "green", "blue"].map((color) => (
-                  <div
-                    key={color}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xl font-bold cursor-pointer ${
-                      color === selectedColor ? "ring-2 ring-black" : ""
-                    }`}
-                    style={{ backgroundColor: color }}
-                    onClick={() => setSelectedColor(color)}
-                  >
-                    {color === selectedColor && "✔"}
-                  </div>
-                ))}
+                {["red", "green", "blue", "yellow", "black", "white"].map(
+                  (color) => (
+                    <div
+                      key={color}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xl font-bold cursor-pointer ${
+                        color === selectedColor ? "ring-2 ring-black" : ""
+                      }`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setSelectedColor(color)}
+                    >
+                      {color === selectedColor && "✔"}
+                    </div>
+                  )
+                )}
               </div>
               <div className="flex gap-4 mb-6">
                 {["Small", "Medium", "Large", "X-Large"].map((size) => (
