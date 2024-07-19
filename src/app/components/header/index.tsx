@@ -40,16 +40,16 @@ export default function Header() {
               className={`flex space-x-4 items-center justify-between ${satoshi.className}`}
             >
               <li>
-                <Link href="/">Shop</Link>
+                <Link href="/details">Shop</Link>
               </li>
               <li>
-                <Link href="/">On Sale</Link>
+                <Link href="/details">On Sale</Link>
               </li>
               <li>
-                <Link href="/">New Arrivals</Link>
+                <Link href="/details">New Arrivals</Link>
               </li>
               <li>
-                <Link href="/">Brands</Link>
+                <Link href="/details">Brands</Link>
               </li>
             </ul>
           </nav>

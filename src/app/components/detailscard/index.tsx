@@ -91,8 +91,8 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
   const handleAddToCart = () => {
     const user = JSON.parse(localStorage.getItem("user") || "null");
     if (!user) {
-      message.error("Please login to add items to your cart.");
-      router.push("/login");
+      message.error("Please sign up to add items to your cart.");
+      router.push("/signup");
       return;
     }
 
