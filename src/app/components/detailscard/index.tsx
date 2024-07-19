@@ -11,6 +11,8 @@ import {
   getDocs,
   query,
   limit,
+  updateDoc,
+  arrayUnion,
 } from "firebase/firestore";
 import { db } from "@/farebase/config";
 import { useRouter } from "next/navigation";
@@ -88,7 +90,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
     });
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     const user = JSON.parse(localStorage.getItem("user") || "null");
     if (!user) {
       message.error("Please sign up to add items to your cart.");
@@ -96,9 +98,26 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
       return;
     }
 
-    // Add to cart functionality here
-    // For demonstration, we'll just show a success message
-    message.success("Item added to cart!");
+    const cartItem = {
+      id: product!.id,
+      name: product!.name,
+      photo: product!.photo[0],
+      price: product!.price,
+      quantity,
+      color: selectedColor,
+    };
+
+    try {
+      const cartRef = doc(db, "cart", "Sq9hZ7Mo4guHBgvkeuMC");
+
+      await updateDoc(cartRef, {
+        items: arrayUnion(cartItem),
+      });
+      message.success("Item added to cart!");
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+      message.error("Error adding item to cart. Please try again.");
+    }
   };
 
   if (!product) {
@@ -230,61 +249,56 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
               {relatedProducts.map((item) => (
                 <div
                   key={item.id}
-                  className={`flex flex-col items-start justify-center gap-3 ${satoshi.className}`}
+                  className="w-[364px] h-[500px] relative shadow-md"
                 >
-                  <Link href={`/details/${item.id}`} className="cursor-pointer">
+                  <div className="relative">
                     <Image
-                      src={item.photo[0] || "/placeholder.png"}
+                      src={item.photo[0]}
                       alt={item.name}
-                      width={290}
-                      height={294}
-                      className="h-72"
+                      width={364}
+                      height={400}
+                      className="rounded-t-lg"
                     />
-                  </Link>
-                  <h4 className="text-[20px] leading-[35px] font-bold">
-                    {item.name}
-                  </h4>
-                  <span className="text-[22px] leading-[20px] font-bold">
-                    ${item.price}
-                  </span>
+                    <div className="absolute bottom-2 left-2 bg-white px-2 py-1 rounded-lg">
+                      <span className="text-lg text-black">${item.price}</span>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-white rounded-b-lg">
+                    <h2 className="text-xl font-bold mb-2">{item.name}</h2>
+                    <div className="flex items-center mb-2">
+                      <span className="text-yellow-500 text-xl mr-1">
+                        {Array.from({ length: Math.floor(item.rating) }).map(
+                          (_, index) => (
+                            <span key={index} className="text-yellow-500">
+                              ★
+                            </span>
+                          )
+                        )}
+                        {item.rating % 1 >= 0.5 && (
+                          <span className="text-yellow-500">★</span>
+                        )}
+                        {Array.from({
+                          length: 5 - Math.ceil(item.rating),
+                        }).map((_, index) => (
+                          <span key={index} className="text-gray-300">
+                            ★
+                          </span>
+                        ))}
+                      </span>
+                      <span className="text-lg text-gray-600">
+                        ({item.rating})/5
+                      </span>
+                    </div>
+                    <Link
+                      href={`/details/${item.id}`}
+                      className="text-white bg-slate-900 px-3 py-2 rounded-full hover:bg-gray-800"
+                    >
+                      View Details
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="">
-        <div className="container">
-          <div className="text-white bg-black rounded-3xl p-14 flex items-center justify-between gap-28">
-            <h1
-              className={`${integralCF.className} text-[40px] leading-[45px] font-700 `}
-            >
-              STAY UPTO DATE ABOUT OUR LATEST OFFERS
-            </h1>
-
-            <form className="flex flex-col gap-6 relative">
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                className={`rounded-3xl p-4 w-[349px] h-[48px] ${satoshi.className} text-base text-black pl-8`}
-              />
-
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 absolute top-3.5 left-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                stroke="black"
-              >
-                <path d="M2 3a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V3zm2-.5v4.943l6 3.499 6-3.499V2.5H4zm0 5.208V17.5h12V8.708l-6 3.5-6-3.5z" />
-              </svg>
-              <button
-                className={`w-[349px] h-[48px] rounded-3xl bg-white border-e-2 border-black ${satoshi.className} text-black text-base  font-bold`}
-              >
-                Subscribe to Newsletter
-              </button>
-            </form>
           </div>
         </div>
       </section>
