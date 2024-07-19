@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import localFont from "next/font/local";
 import { signOut } from "firebase/auth";
-import { auth } from "@/farebase/config";
+import { auth, db } from "@/farebase/config"; // Make sure to import db
+import { doc, getDoc } from "firebase/firestore";
 
 const integralCF = localFont({
   src: "../../../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -15,10 +18,37 @@ const satoshi = localFont({
 });
 
 export default function Header() {
+  const [cartItemCount, setCartItemCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCartItemCount = async () => {
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+      if (!user) {
+        return;
+      }
+
+      try {
+        const cartRef = doc(db, "carts", user.uid); // Ensure this path is correct
+        const cartSnap = await getDoc(cartRef);
+
+        if (cartSnap.exists()) {
+          const cartData = cartSnap.data();
+          const itemCount = cartData.items ? cartData.items.length : 0;
+          setCartItemCount(itemCount);
+        } else {
+          setCartItemCount(0);
+        }
+      } catch (error) {
+        console.error("Error fetching cart item count:", error);
+      }
+    };
+
+    fetchCartItemCount();
+  }, []);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
-
       window.location.href = "/login";
     } catch (error) {
       console.error("Error signing out:", error);
@@ -49,7 +79,7 @@ export default function Header() {
                 <Link href="/details">New Arrivals</Link>
               </li>
               <li>
-                <Link href="/details">Brands</Link>
+                <Link href="/card">Cart</Link>
               </li>
             </ul>
           </nav>
@@ -82,7 +112,7 @@ export default function Header() {
               role="button"
               className="btn btn-ghost btn-circle"
             >
-              <div className="indicator">
+              <a href="/card" className="indicator">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -97,8 +127,12 @@ export default function Header() {
                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
-                <span className="badge badge-sm indicator-item">8</span>
-              </div>
+                {cartItemCount > 0 && (
+                  <span className="badge badge-sm indicator-item">
+                    {cartItemCount}
+                  </span>
+                )}
+              </a>
             </div>
           </div>
         </div>
@@ -111,7 +145,7 @@ export default function Header() {
             >
               <div className="w-10 rounded-full">
                 <img
-                  alt="Tailwind CSS Navbar component"
+                  alt="User avatar"
                   src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
                 />
               </div>

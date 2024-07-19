@@ -46,6 +46,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("red");
+  const [selectedSize, setSelectedSize] = useState("small");
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -105,6 +106,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
       price: product!.price,
       quantity,
       color: selectedColor,
+      size: selectedSize,
     };
 
     try {
@@ -202,7 +204,9 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                 {["Small", "Medium", "Large", "X-Large"].map((size) => (
                   <button
                     key={size}
-                    className="w-[100px] h-[46px] px-4 py-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 text-base active:bg-black active:text-white"
+                    className={`w-[100px] h-[46px] px-4 py-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 text-base ${
+                      size === selectedSize ? "bg-green-500 text-white" : ""
+                    } active:bg-black active:text-white`}
                   >
                     {size}
                   </button>
@@ -245,11 +249,11 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
               You might also like
             </h1>
 
-            <div className="flex flex-wrap justify-center gap-6">
+            <div className="flex flex-wrap items-center  rounded-xl gap-6">
               {relatedProducts.map((item) => (
                 <div
                   key={item.id}
-                  className="w-[364px] h-[500px] relative shadow-md"
+                  className="w-[364px] h-[550px] relative shadow-md rounded-lg"
                 >
                   <div className="relative">
                     <Image
@@ -257,15 +261,15 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                       alt={item.name}
                       width={364}
                       height={400}
-                      className="rounded-t-lg"
+                      className="rounded-t-lg w-[364px] h-[400px]"
                     />
-                    <div className="absolute bottom-2 left-2 bg-white px-2 py-1 rounded-lg">
+                    <div className="absolute bottom-2 left-2 bg-white px-2 py-1 ">
                       <span className="text-lg text-black">${item.price}</span>
                     </div>
                   </div>
                   <div className="p-4 bg-white rounded-b-lg">
                     <h2 className="text-xl font-bold mb-2">{item.name}</h2>
-                    <div className="flex items-center mb-2">
+                    <div className="flex items-center mb-4">
                       <span className="text-yellow-500 text-xl mr-1">
                         {Array.from({ length: Math.floor(item.rating) }).map(
                           (_, index) => (
