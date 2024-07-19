@@ -13,6 +13,7 @@ interface CartItem {
   price: number;
   quantity: number;
   color: string;
+  size: string;
 }
 
 const Cart: React.FC = () => {
@@ -152,6 +153,7 @@ const Cart: React.FC = () => {
                   <h2 className="text-xl font-bold">{item.name}</h2>
                   <p>Color: {item.color}</p>
                   <p>Quantity: {item.quantity}</p>
+                  <p>Size: {item.size}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold">${item.price}</p>

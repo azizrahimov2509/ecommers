@@ -35,6 +35,7 @@ interface Product {
   price: number;
   rating: number;
   description: string;
+  sizes: string[];
 }
 
 interface DetailsCarsProps {
@@ -46,7 +47,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("red");
-  const [selectedSize, setSelectedSize] = useState("small");
+  const [selectedSize, setSelectedSize] = useState("Small");
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -55,7 +56,16 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
         const docRef = doc(db, "products", id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
+          const data = docSnap.data();
+          setProduct({
+            id: docSnap.id,
+            name: data.name,
+            photo: data.photo || [],
+            price: data.price,
+            rating: data.rating,
+            description: data.description,
+            sizes: data.sizes || [],
+          } as Product);
         } else {
           console.error("No such document!");
         }
@@ -132,7 +142,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
         <div className="w-full p-8 bg-white shadow-md rounded-lg">
           <Link
             href="/"
-            className={`text-white mb-4 inline-block text-lg bg-slate-900 p-4 rounded-3xl ${satoshi.className} `}
+            className={`text-white mb-4 inline-block text-lg bg-slate-900 p-4 rounded-3xl ${satoshi.className}`}
           >
             &larr; Back to Home
           </Link>
@@ -146,7 +156,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                 height={400}
               />
             </div>
-            <div className="md:w-1/2 flex flex-col items-start gap-5 ">
+            <div className="md:w-1/2 flex flex-col items-start gap-5">
               <h1 className={`text-4xl font-bold mb-4 ${integralCF.className}`}>
                 {product.name}
               </h1>
@@ -199,7 +209,6 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                   </div>
                 ))}
               </div>
-
               <div className="flex gap-4 mb-6">
                 {["Small", "Medium", "Large", "X-Large"].map((size) => (
                   <button
@@ -207,11 +216,13 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                     className={`w-[100px] h-[46px] px-4 py-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 text-base ${
                       size === selectedSize ? "bg-green-500 text-white" : ""
                     } active:bg-black active:text-white`}
+                    onClick={() => setSelectedSize(size)}
                   >
                     {size}
                   </button>
                 ))}
               </div>
+
               <div className="flex items-center gap-4 mb-6">
                 <div className="flex w-[170px] h-[52px] gap-2 bg-slate-300 rounded-3xl p-3 items-center justify-between">
                   <button
@@ -249,7 +260,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
               You might also like
             </h1>
 
-            <div className="flex flex-wrap items-center  rounded-xl gap-6">
+            <div className="flex flex-wrap items-center rounded-xl gap-6">
               {relatedProducts.map((item) => (
                 <div
                   key={item.id}
@@ -263,7 +274,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                       height={400}
                       className="rounded-t-lg w-[364px] h-[400px]"
                     />
-                    <div className="absolute bottom-2 left-2 bg-white px-2 py-1 ">
+                    <div className="absolute bottom-2 left-2 bg-white px-2 py-1">
                       <span className="text-lg text-black">${item.price}</span>
                     </div>
                   </div>
