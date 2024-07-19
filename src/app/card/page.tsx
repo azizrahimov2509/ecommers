@@ -5,6 +5,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/farebase/config";
 import Image from "next/image";
 import { message } from "antd";
+import loader from "../../../public/loader.gif";
 
 interface CartItem {
   id: string;
@@ -119,7 +120,11 @@ const Cart: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="container mx-auto p-4">Loading...</div>;
+    return (
+      <div className="container mx-auto p-4">
+        <Image src={loader} alt="loader" />
+      </div>
+    );
   }
 
   if (!cartItems.length) {
