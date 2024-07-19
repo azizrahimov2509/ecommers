@@ -121,14 +121,18 @@ const Cart: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4">
+      <div className=" flex items-center  justify-center container mx-auto p-4">
         <Image src={loader} alt="loader" />
       </div>
     );
   }
 
   if (!cartItems.length) {
-    return <div className="container mx-auto p-4 ">Your cart is empty.</div>;
+    return (
+      <div className="container mx-auto p-4 text-center text-xl text-red-600">
+        Your cart is empty.
+      </div>
+    );
   }
 
   return (
