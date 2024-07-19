@@ -103,8 +103,9 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
 
   const handleAddToCart = async () => {
     const user = JSON.parse(localStorage.getItem("user") || "null");
+
     if (!user) {
-      message.error("Please sign up to add items to your cart.");
+      message.error("Please sign up or log in to add items to your cart.");
       router.push("/signup");
       return;
     }
@@ -121,7 +122,6 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
 
     try {
       const cartRef = doc(db, "cart", "Sq9hZ7Mo4guHBgvkeuMC");
-
       await updateDoc(cartRef, {
         items: arrayUnion(cartItem),
       });
