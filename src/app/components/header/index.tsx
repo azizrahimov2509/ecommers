@@ -4,8 +4,9 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import localFont from "next/font/local";
 import { signOut } from "firebase/auth";
-import { auth, db } from "@/farebase/config"; // Make sure to import db
+import { auth, db } from "@/farebase/config";
 import { doc, getDoc } from "firebase/firestore";
+import { useRouter } from "next/navigation"; // For Next.js navigation
 
 const integralCF = localFont({
   src: "../../../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -19,16 +20,40 @@ const satoshi = localFont({
 
 export default function Header() {
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter(); // Hook for navigation
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+
+    if (storedUser) {
+      setUser(storedUser);
+    } else {
+      // Re-authenticate if no data in localStorage
+      const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+        if (currentUser) {
+          const userData = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            photoURL: currentUser.photoURL, // Fetch photoURL
+          };
+          setUser(userData);
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+      });
+
+      return () => unsubscribe(); // Cleanup subscription
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCartItemCount = async () => {
-      const user = JSON.parse(localStorage.getItem("user") || "null");
       if (!user) {
         return;
       }
 
       try {
-        const cartRef = doc(db, "carts", user.uid); // Ensure this path is correct
+        const cartRef = doc(db, "cart", user.uid);
         const cartSnap = await getDoc(cartRef);
 
         if (cartSnap.exists()) {
@@ -44,12 +69,14 @@ export default function Header() {
     };
 
     fetchCartItemCount();
-  }, []);
+  }, [user]);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      window.location.href = "/login";
+      localStorage.removeItem("user");
+      setUser(null);
+      router.push("/login");
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -60,7 +87,7 @@ export default function Header() {
       <div className="container navbar bg-base-100">
         <div className="container mx-auto flex justify-between items-center p-4">
           <Link
-            href={"/"}
+            href="/"
             className={`text-3xl font-bold pb-1 ${integralCF.className}`}
           >
             SHOP.CO
@@ -112,7 +139,7 @@ export default function Header() {
               role="button"
               className="btn btn-ghost btn-circle"
             >
-              <a href="/card" className="indicator">
+              <Link href="/card" className="indicator">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -132,7 +159,7 @@ export default function Header() {
                     {cartItemCount}
                   </span>
                 )}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -146,7 +173,10 @@ export default function Header() {
               <div className="w-10 rounded-full">
                 <img
                   alt="User avatar"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                  src={
+                    user?.photoURL ||
+                    "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                  }
                 />
               </div>
             </div>
