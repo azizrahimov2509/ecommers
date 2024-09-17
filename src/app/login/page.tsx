@@ -1,4 +1,3 @@
-
 "use client";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";

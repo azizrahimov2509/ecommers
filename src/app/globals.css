@@ -21,4 +21,35 @@
   .container {
     @apply w-[1240px] mx-auto;
   }
+
+  /* styles/globals.css */
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    z-index: 1000;
+  }
+
+  .search-results-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .search-results-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .search-results-list li {
+    padding: 8px;
+  }
+
+  .search-results-list li p {
+    text-decoration: none;
+    color: #333;
+  }
 }

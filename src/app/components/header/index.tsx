@@ -6,7 +6,10 @@ import localFont from "next/font/local";
 import { signOut } from "firebase/auth";
 import { auth, db } from "@/farebase/config";
 import { doc, getDoc } from "firebase/firestore";
-import { useRouter } from "next/navigation"; // For Next.js navigation
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/app/store/store";
+import { setQuery } from "@/app/store/searchSlice";
 
 const integralCF = localFont({
   src: "../../../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -21,69 +24,73 @@ const satoshi = localFont({
 export default function Header() {
   const [cartItemCount, setCartItemCount] = useState(0);
   const [user, setUser] = useState<any>(null);
-  const router = useRouter(); // Hook for navigation
+  const [search, setSearch] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "null");
 
     if (storedUser) {
       setUser(storedUser);
+      loadCartItemCount(storedUser.uid);
     } else {
-      // Re-authenticate if no data in localStorage
-      const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
         if (currentUser) {
           const userData = {
             uid: currentUser.uid,
             email: currentUser.email,
-            photoURL: currentUser.photoURL, // Fetch photoURL
+            photoURL:
+              "https://www.visualfacilitators.com/wp-content/uploads/2021/07/testimonial_anonymous-person_icon.png",
           };
           setUser(userData);
           localStorage.setItem("user", JSON.stringify(userData));
+          loadCartItemCount(userData.uid);
         }
       });
-
-      return () => unsubscribe(); // Cleanup subscription
+      return () => unsubscribe();
     }
   }, []);
 
-  useEffect(() => {
-    const fetchCartItemCount = async () => {
-      if (!user) {
-        return;
-      }
-
-      try {
-        const cartRef = doc(db, "cart", user.uid);
-        const cartSnap = await getDoc(cartRef);
-
-        if (cartSnap.exists()) {
-          const cartData = cartSnap.data();
-          const itemCount = cartData.items ? cartData.items.length : 0;
-          setCartItemCount(itemCount);
-        } else {
-          setCartItemCount(0);
-        }
-      } catch (error) {
-        console.error("Error fetching cart item count:", error);
-      }
-    };
-
-    fetchCartItemCount();
-  }, [user]);
+  const loadCartItemCount = async (uid: string) => {
+    try {
+      const cartRef = doc(db, "cart", uid);
+      const cartSnap = await getDoc(cartRef);
+      const cartData = cartSnap.data();
+      const itemCount = cartData?.items ? cartData.items.length : 0;
+      setCartItemCount(itemCount);
+      localStorage.setItem("cartItemCount", JSON.stringify(itemCount));
+    } catch (error) {
+      console.error("Error fetching cart item count:", error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       localStorage.removeItem("user");
+      localStorage.removeItem("cartItemCount");
       setUser(null);
+      setCartItemCount(0);
       router.push("/login");
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    dispatch(setQuery(value));
+    if (value) {
+      router.push(`/searchRes?query=${encodeURIComponent(value)}`);
+    } else {
+      router.push(`/searchRes`);
+    }
+  };
+
   return (
-    <header className="pt-1 pb-1">
+    <header className="pt-1 pb-1 bg-white shadow-md">
       <div className="container navbar bg-base-100">
         <div className="container mx-auto flex justify-between items-center p-4">
           <Link
@@ -92,10 +99,9 @@ export default function Header() {
           >
             SHOP.CO
           </Link>
+
           <nav>
-            <ul
-              className={`flex space-x-4 items-center justify-between ${satoshi.className}`}
-            >
+            <ul className={`flex space-x-4 items-center ${satoshi.className}`}>
               <li>
                 <Link href="/details">Shop</Link>
               </li>
@@ -110,11 +116,14 @@ export default function Header() {
               </li>
             </ul>
           </nav>
-          <div className="relative">
+
+          <div className="relative w-[577px]">
             <input
               type="text"
               placeholder="Search for products..."
-              className="input input-bordered w-[577px] h-[48px] pl-7 pr-3 rounded-3xl bg-[#F0F0F0]"
+              value={search}
+              onChange={handleSearchChange}
+              className="input input-bordered w-full h-[48px] pl-10 pr-3 rounded-3xl bg-[#F0F0F0]"
             />
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -131,74 +140,67 @@ export default function Header() {
               />
             </svg>
           </div>
-        </div>
-        <div className="flex-none">
-          <div className="dropdown dropdown-end">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn btn-ghost btn-circle"
-            >
-              <Link href="/card" className="indicator">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                {cartItemCount > 0 && (
-                  <span className="badge badge-sm indicator-item">
-                    {cartItemCount}
-                  </span>
-                )}
-              </Link>
-            </div>
-          </div>
-        </div>
-        <div className="flex-none gap-2">
-          <div className="dropdown dropdown-end">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn btn-ghost btn-circle avatar"
-            >
-              <div className="w-10 rounded-full">
-                <img
-                  alt="User avatar"
-                  src={
-                    user?.photoURL ||
-                    "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
-                  }
+
+          <div className="relative ml-4">
+            <Link href="/card" className="indicator">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                 />
+              </svg>
+              {cartItemCount > 0 && (
+                <span className="badge badge-sm indicator-item">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
+          </div>
+
+          <div className="flex-none gap-2 ml-4">
+            <div className="dropdown dropdown-end">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-circle avatar"
+              >
+                <div className="w-10 rounded-full">
+                  <img
+                    alt="User avatar"
+                    src={
+                      "https://www.visualfacilitators.com/wp-content/uploads/2021/07/testimonial_anonymous-person_icon.png"
+                    }
+                  />
+                </div>
               </div>
+              <ul
+                tabIndex={0}
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+              >
+                <li>
+                  <a className="justify-between">
+                    {}
+                    <span className="badge">New</span>
+                  </a>
+                </li>
+                <li>
+                  <a>Settings</a>
+                </li>
+                <li>
+                  <button onClick={handleLogout} className="w-full text-left">
+                    Logout
+                  </button>
+                </li>
+              </ul>
             </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
-            >
-              <li>
-                <a className="justify-between">
-                  Profile
-                  <span className="badge">New</span>
-                </a>
-              </li>
-              <li>
-                <a>Settings</a>
-              </li>
-              <li>
-                <button onClick={handleLogout} className="w-full text-left">
-                  Logout
-                </button>
-              </li>
-            </ul>
           </div>
         </div>
       </div>

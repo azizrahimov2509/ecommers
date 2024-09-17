@@ -137,6 +137,28 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
     }
   };
 
+  const renderRatingStars = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - Math.ceil(rating);
+
+    return (
+      <div className="flex items-center">
+        {[...Array(fullStars)].map((_, index) => (
+          <span key={index} className="text-yellow-500 text-2xl">
+            ★
+          </span>
+        ))}
+        {halfStar && <span className="text-yellow-500 text-2xl">☆</span>}
+        {[...Array(emptyStars)].map((_, index) => (
+          <span key={index} className="text-gray-300 text-2xl">
+            ★
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   if (!product) {
     return <div className="container">Loading...</div>;
   }
@@ -166,26 +188,8 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                 {product.name}
               </h1>
               <div className="flex items-center mb-6">
-                <span className="text-yellow-500 text-2xl mr-2">
-                  {Array.from({ length: Math.floor(product.rating) }).map(
-                    (_, index) => (
-                      <span key={index} className="text-yellow-500">
-                        ★
-                      </span>
-                    )
-                  )}
-                  {product.rating % 1 >= 0.5 && (
-                    <span className="text-yellow-500">★</span>
-                  )}
-                  {Array.from({ length: 5 - Math.ceil(product.rating) }).map(
-                    (_, index) => (
-                      <span key={index} className="text-gray-300">
-                        ★
-                      </span>
-                    )
-                  )}
-                </span>
-                <span className="text-lg text-gray-600">
+                {renderRatingStars(product.rating)}
+                <span className="text-lg text-gray-600 ml-2">
                   ({product.rating})/5
                 </span>
               </div>
@@ -257,35 +261,43 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
           <h2 className={`text-3xl font-bold mb-4 ${integralCF.className}`}>
             Related Products
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {relatedProducts.map((relatedProduct) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {relatedProducts.map((item) => (
               <div
-                key={relatedProduct.id}
-                className="p-4 bg-white shadow-md rounded-lg"
+                key={item.id}
+                className="overflow-hidden flex flex-col items-start justify-between gap-2 "
               >
-                <Image
-                  src={relatedProduct.photo[0]}
-                  alt={relatedProduct.name}
-                  className="mb-4 rounded-lg"
-                  width={200}
-                  height={200}
-                />
-                <h3
-                  className={`text-xl font-bold mb-2 ${integralCF.className}`}
-                >
-                  {relatedProduct.name}
-                </h3>
-                <p
-                  className={`mb-2 ${satoshi.className} text-[20px] leading-[27px] font-bold`}
-                >
-                  ${relatedProduct.price}
-                </p>
-                <Link
-                  href={`/product/${relatedProduct.id}`}
-                  className="text-blue-500 hover:underline"
-                >
-                  View Details
+                <Link href={`/details/${item.id}`} className="cursor-pointer">
+                  <Image
+                    src={item.photo[0] || "/placeholder.png"}
+                    alt={item.name}
+                    width={290}
+                    height={294}
+                    className="h-72"
+                  />
                 </Link>
+                <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                  {item.name}
+                </h4>
+                <div className="flex items-center ">
+                  <div className="rating pr-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <input
+                        key={star}
+                        type="radio"
+                        name={`rating-${item.id}`}
+                        className="mask mask-star-2 bg-orange-400"
+                        defaultChecked={item.rating >= star}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-black">
+                    {item.rating}/<span className="text-gray-600">5</span>
+                  </p>
+                </div>
+                <h3 className="text-[24px] leading-[37px] font-bold">
+                  ${item.price}
+                </h3>
               </div>
             ))}
           </div>

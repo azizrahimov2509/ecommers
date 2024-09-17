@@ -9,6 +9,8 @@ import Footer from "./components/footer";
 import { AuthProvider, useAuth } from "./components/Authcontent/authcontent";
 import Link from "next/link";
 import Login from "./login/page";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
 
 const inter = Roboto_Mono({ subsets: ["latin"] });
 
@@ -21,15 +23,17 @@ export default function RootLayout({
 
   return (
     <AuthProvider>
-      <html lang="en" data-theme="light">
-        <body className={inter.className}>
-          {pathname === "/login" || pathname === "/signup" ? (
-            children
-          ) : (
-            <ProtectedLayout>{children}</ProtectedLayout>
-          )}
-        </body>
-      </html>
+      <Provider store={store}>
+        <html lang="en" data-theme="light">
+          <body className={inter.className}>
+            {pathname === "/login" || pathname === "/signup" ? (
+              children
+            ) : (
+              <ProtectedLayout>{children}</ProtectedLayout>
+            )}
+          </body>
+        </html>
+      </Provider>
     </AuthProvider>
   );
 }

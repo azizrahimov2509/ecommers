@@ -10,6 +10,7 @@ import {
   query,
   limit,
   startAfter,
+  QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "@/farebase/config";
 
@@ -34,12 +35,22 @@ interface Product {
 export default function Details() {
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [topSellings, setTopSellings] = useState<Product[]>([]);
+  const [newArrivalsAll, setNewArrivalsAll] = useState<Product[]>([]);
+  const [topSellingsAll, setTopSellingsAll] = useState<Product[]>([]);
+  const [newArrivalsLastDoc, setNewArrivalsLastDoc] =
+    useState<QueryDocumentSnapshot | null>(null);
+  const [topSellingsLastDoc, setTopSellingsLastDoc] =
+    useState<QueryDocumentSnapshot | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [showAllNewArrivals, setShowAllNewArrivals] = useState(false);
+  const [showAllTopSellings, setShowAllTopSellings] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const productsRef = collection(db, "products");
 
+        // Fetch initial new arrivals
         const newArrivalsQuery = query(productsRef, limit(4));
         const newArrivalsSnapshot = await getDocs(newArrivalsQuery);
         const newArrivalsData = newArrivalsSnapshot.docs.map((doc) => ({
@@ -48,12 +59,17 @@ export default function Details() {
         })) as Product[];
 
         setNewArrivals(newArrivalsData);
+        setNewArrivalsAll(newArrivalsData);
+        setNewArrivalsLastDoc(
+          newArrivalsSnapshot.docs[newArrivalsSnapshot.docs.length - 1]
+        );
 
-        const lastDoc =
-          newArrivalsSnapshot.docs[newArrivalsSnapshot.docs.length - 1];
+        // Fetch initial top sellings
         const topSellingsQuery = query(
           productsRef,
-          startAfter(lastDoc),
+          startAfter(
+            newArrivalsSnapshot.docs[newArrivalsSnapshot.docs.length - 1]
+          ),
           limit(4)
         );
         const topSellingsSnapshot = await getDocs(topSellingsQuery);
@@ -63,6 +79,10 @@ export default function Details() {
         })) as Product[];
 
         setTopSellings(topSellingsData);
+        setTopSellingsAll(topSellingsData);
+        setTopSellingsLastDoc(
+          topSellingsSnapshot.docs[topSellingsSnapshot.docs.length - 1]
+        );
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -70,6 +90,57 @@ export default function Details() {
 
     fetchProducts();
   }, []);
+
+  const fetchMoreProducts = async (type: "newArrivals" | "topSellings") => {
+    if (loadingMore) return;
+
+    setLoadingMore(true);
+    try {
+      const productsRef = collection(db, "products");
+
+      if (type === "newArrivals" && newArrivalsLastDoc) {
+        const newArrivalsQuery = query(
+          productsRef,
+          startAfter(newArrivalsLastDoc),
+          limit(4)
+        );
+        const newArrivalsSnapshot = await getDocs(newArrivalsQuery);
+        const newArrivalsData = newArrivalsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Product[];
+
+        setNewArrivals((prev) => [...prev, ...newArrivalsData]);
+        setNewArrivalsAll((prev) => [...prev, ...newArrivalsData]);
+        setNewArrivalsLastDoc(
+          newArrivalsSnapshot.docs[newArrivalsSnapshot.docs.length - 1]
+        );
+      }
+
+      if (type === "topSellings" && topSellingsLastDoc) {
+        const topSellingsQuery = query(
+          productsRef,
+          startAfter(topSellingsLastDoc),
+          limit(4)
+        );
+        const topSellingsSnapshot = await getDocs(topSellingsQuery);
+        const topSellingsData = topSellingsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Product[];
+
+        setTopSellings((prev) => [...prev, ...topSellingsData]);
+        setTopSellingsAll((prev) => [...prev, ...topSellingsData]);
+        setTopSellingsLastDoc(
+          topSellingsSnapshot.docs[topSellingsSnapshot.docs.length - 1]
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching more products:", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <>
@@ -81,53 +152,77 @@ export default function Details() {
             >
               NEW ARRIVALS
             </h1>
-            <div className="flex items-center justify-between gap-6">
-              {newArrivals.map((item) => (
-                <div
-                  key={item.id}
-                  className={`flex flex-col items-start justify-center gap-3 ${satoshi.className}`}
-                >
-                  <Link href={`/details/${item.id}`} className="cursor-pointer">
-                    <Image
-                      src={item.photo[0] || "/placeholder.png"}
-                      alt={item.name}
-                      width={290}
-                      height={294}
-                      className="h-72"
-                    />
-                  </Link>
-                  <h4 className="text-[20px] leading-[27px] font-bold text-black">
-                    {item.name}
-                  </h4>
-                  <div className="flex items-center justify-between">
-                    <div className="rating">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <input
-                          key={star}
-                          type="radio"
-                          name={`rating-${item.id}`}
-                          className="mask mask-star-2 bg-orange-400"
-                          defaultChecked={item.rating >= star}
-                        />
-                      ))}
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              {(showAllNewArrivals ? newArrivalsAll : newArrivals).map(
+                (item) => (
+                  <div
+                    key={item.id}
+                    className={`flex flex-col items-start justify-center gap-3 ${satoshi.className}`}
+                  >
+                    <Link
+                      href={`/details/${item.id}`}
+                      className="cursor-pointer"
+                    >
+                      <Image
+                        src={item.photo[0] || "/placeholder.png"}
+                        alt={item.name}
+                        width={290}
+                        height={294}
+                        className="h-72"
+                      />
+                    </Link>
+                    <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                      {item.name}
+                    </h4>
+                    <div className="flex items-center justify-between">
+                      <div className="rating">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <input
+                            key={star}
+                            type="radio"
+                            name={`rating-${item.id}`}
+                            className="mask mask-star-2 bg-orange-400"
+                            defaultChecked={item.rating >= star}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-black">
+                        {item.rating}/<span className="text-gray-600">5</span>
+                      </p>
                     </div>
-                    <p className="text-black">
-                      {item.rating}/<span className="text-gray-600">5</span>
-                    </p>
+                    <h3 className="text-[24px] leading-[37px] font-bold">
+                      ${item.price}
+                    </h3>
                   </div>
-                  <h3 className="text-[24px] leading-[37px] font-bold">
-                    ${item.price}
-                  </h3>
-                </div>
-              ))}
+                )
+              )}
             </div>
-            <div>
-              <button
-                className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500 `}
-              >
-                View All
-              </button>
-            </div>
+            {!showAllNewArrivals && newArrivalsLastDoc && (
+              <div>
+                <button
+                  onClick={() => {
+                    fetchMoreProducts("newArrivals");
+                    setShowAllNewArrivals(true);
+                  }}
+                  className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500`}
+                >
+                  {loadingMore ? "Loading..." : "View All"}
+                </button>
+              </div>
+            )}
+            {showAllNewArrivals && (
+              <div>
+                <button
+                  onClick={() => {
+                    setShowAllNewArrivals(false);
+                    setNewArrivals(newArrivals.slice(0, 4)); // Reset to initial state
+                  }}
+                  className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500`}
+                >
+                  Hide
+                </button>
+              </div>
+            )}
           </div>
           <hr />
         </div>
@@ -140,89 +235,79 @@ export default function Details() {
             >
               TOP SELLING
             </h1>
-            <div className="flex items-center justify-between gap-6">
-              {topSellings.map((item) => (
-                <div
-                  key={item.id}
-                  className={`flex flex-col items-start justify-center gap-3  ${satoshi.className} w-[290px]`}
-                >
-                  <Link href={`/details/${item.id}`} className="cursor-pointer">
-                    <Image
-                      src={item.photo[0] || "/placeholder.png"}
-                      alt={item.name}
-                      width={290}
-                      height={294}
-                      className="h-72"
-                    />
-                  </Link>
-                  <h4 className="text-[20px] leading-[27px] font-bold text-black">
-                    {item.name}
-                  </h4>
-                  <div className="flex items-center justify-between">
-                    <div className="rating">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <input
-                          key={star}
-                          type="radio"
-                          name={`rating-${item.id}`}
-                          className="mask mask-star-2 bg-orange-400"
-                          defaultChecked={item.rating >= star}
-                        />
-                      ))}
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              {(showAllTopSellings ? topSellingsAll : topSellings).map(
+                (item) => (
+                  <div
+                    key={item.id}
+                    className={`flex flex-col items-start justify-center gap-3 ${satoshi.className}`}
+                  >
+                    <Link
+                      href={`/details/${item.id}`}
+                      className="cursor-pointer"
+                    >
+                      <Image
+                        src={item.photo[0] || "/placeholder.png"}
+                        alt={item.name}
+                        width={290}
+                        height={294}
+                        className="h-72"
+                      />
+                    </Link>
+                    <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                      {item.name}
+                    </h4>
+                    <div className="flex items-center justify-between">
+                      <div className="rating">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <input
+                            key={star}
+                            type="radio"
+                            name={`rating-${item.id}`}
+                            className="mask mask-star-2 bg-orange-400"
+                            defaultChecked={item.rating >= star}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-black">
+                        {item.rating}/<span className="text-gray-600">5</span>
+                      </p>
                     </div>
-                    <p className="text-black">
-                      {item.rating}/<span className="text-gray-600">5</span>
-                    </p>
+                    <h3 className="text-[24px] leading-[37px] font-bold">
+                      ${item.price}
+                    </h3>
                   </div>
-                  <h3 className="text-[24px] leading-[37px] font-bold">
-                    ${item.price}
-                  </h3>
-                </div>
-              ))}
+                )
+              )}
             </div>
-            <div>
-              <button
-                className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500 `}
-              >
-                View All
-              </button>
-            </div>
+            {!showAllTopSellings && topSellingsLastDoc && (
+              <div>
+                <button
+                  onClick={() => {
+                    fetchMoreProducts("topSellings");
+                    setShowAllTopSellings(true);
+                  }}
+                  className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500`}
+                >
+                  {loadingMore ? "Loading..." : "View All"}
+                </button>
+              </div>
+            )}
+            {showAllTopSellings && (
+              <div>
+                <button
+                  onClick={() => {
+                    setShowAllTopSellings(false);
+                    setTopSellings(topSellings.slice(0, 4)); // Reset to initial state
+                  }}
+                  className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500`}
+                >
+                  Hide
+                </button>
+              </div>
+            )}
           </div>
-        </div>
-      </section>
-
-      <section className="">
-        <div className="container">
-          <div className="text-white bg-black rounded-3xl p-14 flex items-center justify-between gap-28">
-            <h1
-              className={`${integralCF.className} text-[40px] leading-[45px] font-700 `}
-            >
-              STAY UPTO DATE ABOUT OUR LATEST OFFERS
-            </h1>
-
-            <form className="flex flex-col gap-6 relative">
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                className={`rounded-3xl p-4 w-[349px] h-[48px] ${satoshi.className} text-base text-black pl-8`}
-              />
-
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 absolute top-3.5 left-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                stroke="black"
-              >
-                <path d="M2 3a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V3zm2-.5v4.943l6 3.499 6-3.499V2.5H4zm0 5.208V17.5h12V8.708l-6 3.5-6-3.5z" />
-              </svg>
-              <button
-                className={`w-[349px] h-[48px] rounded-3xl bg-white border-e-2 border-black ${satoshi.className} text-black text-base  font-bold`}
-              >
-                Subscribe to Newsletter
-              </button>
-            </form>
-          </div>
+          <hr />
         </div>
       </section>
     </>

@@ -10,7 +10,6 @@ interface SignUpData {
   email: string;
   password: string;
   displayName: string;
-  photoURL: string;
 }
 
 const SignUp: React.FC = () => {
@@ -19,7 +18,6 @@ const SignUp: React.FC = () => {
     email: "",
     password: "",
     displayName: "",
-    photoURL: "",
   });
   const [errors, setErrors] = useState({
     email: "",
@@ -33,7 +31,7 @@ const SignUp: React.FC = () => {
   };
 
   const validatePassword = (password: string) => {
-    return password.length >= 6; // Example: Password must be at least 6 characters long
+    return password.length >= 6;
   };
 
   const validateInputs = () => {
@@ -76,11 +74,19 @@ const SignUp: React.FC = () => {
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, {
           displayName: signData.displayName,
-          photoURL: signData.photoURL,
         });
+
+        // Save the user's profile info to localStorage
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            uid: user.uid,
+            email: user.email,
+            photoURL: auth.currentUser.photoURL || "", // Save the photo URL if available
+          })
+        );
       }
 
-      localStorage.setItem("user", JSON.stringify(user));
       message.success("Sign up successful!");
       router.push("/");
     } catch (error: any) {
@@ -139,19 +145,6 @@ const SignUp: React.FC = () => {
           value={signData.displayName}
           onChange={(e) =>
             setSignData({ ...signData, displayName: e.target.value })
-          }
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-gray-700">Image link</label>
-        <input
-          type="text"
-          className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Image link"
-          value={signData.photoURL}
-          onChange={(e) =>
-            setSignData({ ...signData, photoURL: e.target.value })
           }
         />
       </div>
