@@ -287,8 +287,8 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                 {["Small", "Medium", "Large", "X-Large"].map((size) => (
                   <button
                     key={size}
-                    className={`w-[100px] h-[46px] px-4 py-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-[blue] hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 text-base ${
-                      size === selectedSize ? "bg-[blue] text-white" : ""
+                    className={`w-[100px] h-[46px] px-4 py-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-[blue] hover:text-white focus:outline-none focus:ring-2 focus:ring-[blue] text-base ${
+                      size === selectedSize ? "bg-sky-600 text-white" : ""
                     }`}
                     onClick={() => setSelectedSize(size)}
                   >
@@ -296,6 +296,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                   </button>
                 ))}
               </div>
+
               <div className="flex items-center mb-6">
                 <button
                   onClick={() => handleQuantityChange("decrease")}

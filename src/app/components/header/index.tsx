@@ -28,6 +28,9 @@ export default function Header() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
+  // Состояние для отслеживания активного пути
+  const [activePath, setActivePath] = useState(window.location.pathname);
+
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "null");
 
@@ -88,13 +91,19 @@ export default function Header() {
     }
   };
 
+  // Функция для добавления активного класса
+  const getLinkClass = (path: string) => {
+    return activePath === path ? "active" : "";
+  };
+
   return (
     <header className="pt-1 pb-1 bg-white shadow-md">
       <div className="container navbar bg-base-100">
         <div className="container mx-auto flex justify-between items-center p-4">
           <Link
             href="/"
-            className={`text-3xl font-bold pb-1 ${integralCF.className}`}
+            className={`text-3xl font-bold pb-1 ${integralCF.className} `}
+            onClick={() => setActivePath("/")}
           >
             SHOP.CO
           </Link>
@@ -102,16 +111,40 @@ export default function Header() {
           <nav>
             <ul className={`flex space-x-4 items-center ${satoshi.className}`}>
               <li>
-                <Link href="/searchRes">Shop</Link>
+                <Link
+                  href="/searchRes"
+                  className={getLinkClass("/searchRes")}
+                  onClick={() => setActivePath("/searchRes")}
+                >
+                  Shop
+                </Link>
               </li>
               <li>
-                <Link href="/details">On Sale</Link>
+                <Link
+                  href="/details"
+                  className={getLinkClass("/details")}
+                  onClick={() => setActivePath("/details")}
+                >
+                  On Sale
+                </Link>
               </li>
               <li>
-                <Link href="/details">New Arrivals</Link>
+                <Link
+                  href="/details"
+                  className={getLinkClass("/details")}
+                  onClick={() => setActivePath("/details")}
+                >
+                  New Arrivals
+                </Link>
               </li>
               <li>
-                <Link href="/card">Cart</Link>
+                <Link
+                  href="/card"
+                  className={getLinkClass("/card")}
+                  onClick={() => setActivePath("/card")}
+                >
+                  Cart
+                </Link>
               </li>
             </ul>
           </nav>
