@@ -42,7 +42,7 @@ const Cart: React.FC = () => {
       }
     });
 
-    return () => unsubscribe(); // Clean up the subscription on component unmount
+    return () => unsubscribe();
   }, [auth]);
 
   useEffect(() => {
@@ -52,13 +52,7 @@ const Cart: React.FC = () => {
       try {
         const cartRef = doc(db, "cart", user.uid);
         const cartSnap = await getDoc(cartRef);
-
-        if (cartSnap.exists()) {
-          const cartData = cartSnap.data();
-          setCartItems(cartData.items || []);
-        } else {
-          setCartItems([]);
-        }
+        setCartItems(cartSnap.exists() ? cartSnap.data().items || [] : []);
       } catch (error) {
         console.error("Error fetching cart items:", error);
         message.error("Error fetching cart items. Please try again.");

@@ -5,10 +5,10 @@ import React, { useEffect, useState } from "react";
 import localFont from "next/font/local";
 import { signOut } from "firebase/auth";
 import { auth, db } from "@/farebase/config";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "@/app/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/app/store/store";
 import { setQuery } from "@/app/store/searchSlice";
 
 const integralCF = localFont({
@@ -33,43 +33,42 @@ export default function Header() {
 
     if (storedUser) {
       setUser(storedUser);
-      loadCartItemCount(storedUser.uid);
+      subscribeToCartChanges(storedUser.uid);
     } else {
       const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
         if (currentUser) {
           const userData = {
             uid: currentUser.uid,
             email: currentUser.email,
+            displayName: currentUser.displayName || "Anonymous",
             photoURL:
               "https://www.visualfacilitators.com/wp-content/uploads/2021/07/testimonial_anonymous-person_icon.png",
           };
           setUser(userData);
           localStorage.setItem("user", JSON.stringify(userData));
-          loadCartItemCount(userData.uid);
+          subscribeToCartChanges(userData.uid);
         }
       });
       return () => unsubscribe();
     }
   }, []);
 
-  const loadCartItemCount = async (uid: string) => {
-    try {
-      const cartRef = doc(db, "cart", uid);
-      const cartSnap = await getDoc(cartRef);
-      const cartData = cartSnap.data();
+  const subscribeToCartChanges = (uid: string) => {
+    const cartRef = doc(db, "cart", uid);
+
+    const unsubscribe = onSnapshot(cartRef, (docSnap) => {
+      const cartData = docSnap.data();
       const itemCount = cartData?.items ? cartData.items.length : 0;
       setCartItemCount(itemCount);
-      localStorage.setItem("cartItemCount", JSON.stringify(itemCount));
-    } catch (error) {
-      console.error("Error fetching cart item count:", error);
-    }
+    });
+
+    return () => unsubscribe();
   };
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       localStorage.removeItem("user");
-      localStorage.removeItem("cartItemCount");
       setUser(null);
       setCartItemCount(0);
       router.push("/login");
@@ -165,19 +164,20 @@ export default function Header() {
             </Link>
           </div>
 
-          <div className="flex-none gap-2 ml-4">
+          <div className="flex items-center gap-2 ml-4">
             <div className="dropdown dropdown-end">
               <div
                 tabIndex={0}
                 role="button"
-                className="btn btn-ghost btn-circle avatar"
+                className="btn btn-ghost btn-circle avatar "
               >
-                <div className="w-10 rounded-full">
+                <div className="w-10 rounded-full flex items-center">
                   <img
                     alt="User avatar"
                     src={
                       "https://www.visualfacilitators.com/wp-content/uploads/2021/07/testimonial_anonymous-person_icon.png"
                     }
+                    className="w-10 h-10 rounded-full"
                   />
                 </div>
               </div>
@@ -187,19 +187,19 @@ export default function Header() {
               >
                 <li>
                   <a className="justify-between">
-                    {}
-                    <span className="badge">New</span>
+                    {user?.displayName || "Anonymous"}
                   </a>
                 </li>
-                <li>
-                  <a>Settings</a>
-                </li>
+
                 <li>
                   <button onClick={handleLogout} className="w-full text-left">
                     Logout
                   </button>
                 </li>
               </ul>
+            </div>
+            <div className="ml-2 text-lg font-semibold">
+              {user?.displayName}
             </div>
           </div>
         </div>

@@ -82,7 +82,7 @@ const SignUp: React.FC = () => {
           JSON.stringify({
             uid: user.uid,
             email: user.email,
-            photoURL: auth.currentUser.photoURL || "", // Save the photo URL if available
+            displayName: signData.displayName, 
           })
         );
       }

@@ -157,7 +157,7 @@ export default function Details() {
                 (item) => (
                   <div
                     key={item.id}
-                    className={`flex flex-col items-start justify-center gap-3 ${satoshi.className}`}
+                    className={`flex flex-col items-start justify-center gap-3 hover:shadow-lg rounded-xl pb-3 ${satoshi.className}`}
                   >
                     <Link
                       href={`/details/${item.id}`}
@@ -170,29 +170,32 @@ export default function Details() {
                         height={294}
                         className="h-72"
                       />
-                    </Link>
-                    <h4 className="text-[20px] leading-[27px] font-bold text-black">
-                      {item.name}
-                    </h4>
-                    <div className="flex items-center justify-between">
-                      <div className="rating">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <input
-                            key={star}
-                            type="radio"
-                            name={`rating-${item.id}`}
-                            className="mask mask-star-2 bg-orange-400"
-                            defaultChecked={item.rating >= star}
-                          />
-                        ))}
+                      <div className="pl-4 flex flex-col items-start justify-between gap-4">
+                        <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                          {item.name}
+                        </h4>
+                        <div className="flex items-center ">
+                          <div className="rating">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <input
+                                key={star}
+                                type="radio"
+                                name={`rating-${item.id}`}
+                                className="mask mask-star-2 bg-orange-400"
+                                defaultChecked={item.rating >= star}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-black">
+                            {item.rating}/
+                            <span className="text-gray-600">5</span>
+                          </p>
+                        </div>
+                        <h3 className="text-[24px] leading-[37px] font-bold">
+                          ${item.price}
+                        </h3>
                       </div>
-                      <p className="text-black">
-                        {item.rating}/<span className="text-gray-600">5</span>
-                      </p>
-                    </div>
-                    <h3 className="text-[24px] leading-[37px] font-bold">
-                      ${item.price}
-                    </h3>
+                    </Link>
                   </div>
                 )
               )}
@@ -215,7 +218,7 @@ export default function Details() {
                 <button
                   onClick={() => {
                     setShowAllNewArrivals(false);
-                    setNewArrivals(newArrivals.slice(0, 4)); // Reset to initial state
+                    setNewArrivals(newArrivals.slice(0, 4));
                   }}
                   className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500`}
                 >
@@ -240,7 +243,7 @@ export default function Details() {
                 (item) => (
                   <div
                     key={item.id}
-                    className={`flex flex-col items-start justify-center gap-3 ${satoshi.className}`}
+                    className={`flex flex-col items-start justify-center gap-3 hover:shadow-lg rounded-xl pb-4 ${satoshi.className}`}
                   >
                     <Link
                       href={`/details/${item.id}`}
@@ -253,29 +256,32 @@ export default function Details() {
                         height={294}
                         className="h-72"
                       />
-                    </Link>
-                    <h4 className="text-[20px] leading-[27px] font-bold text-black">
-                      {item.name}
-                    </h4>
-                    <div className="flex items-center justify-between">
-                      <div className="rating">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <input
-                            key={star}
-                            type="radio"
-                            name={`rating-${item.id}`}
-                            className="mask mask-star-2 bg-orange-400"
-                            defaultChecked={item.rating >= star}
-                          />
-                        ))}
+                      <div className="pl-4 flex flex-col items-start justify-between gap-4">
+                        <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                          {item.name}
+                        </h4>
+                        <div className="flex items-center ">
+                          <div className="rating">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <input
+                                key={star}
+                                type="radio"
+                                name={`rating-${item.id}`}
+                                className="mask mask-star-2 bg-orange-400"
+                                defaultChecked={item.rating >= star}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-black">
+                            {item.rating}/
+                            <span className="text-gray-600">5</span>
+                          </p>
+                        </div>
+                        <h3 className="text-[24px] leading-[37px] font-bold">
+                          ${item.price}
+                        </h3>
                       </div>
-                      <p className="text-black">
-                        {item.rating}/<span className="text-gray-600">5</span>
-                      </p>
-                    </div>
-                    <h3 className="text-[24px] leading-[37px] font-bold">
-                      ${item.price}
-                    </h3>
+                    </Link>
                   </div>
                 )
               )}

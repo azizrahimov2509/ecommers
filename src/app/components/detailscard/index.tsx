@@ -13,6 +13,8 @@ import {
   limit,
   updateDoc,
   arrayUnion,
+  arrayRemove,
+  setDoc,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "@/farebase/config";
@@ -37,6 +39,16 @@ interface Product {
   rating: number;
   description: string;
   sizes: string[];
+}
+
+interface CartItem {
+  id: string;
+  name: string;
+  photo: string;
+  price: number;
+  quantity: number;
+  color: string;
+  size: string;
 }
 
 interface DetailsCarsProps {
@@ -114,8 +126,11 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
 
     if (!product) return;
 
+    // Создание уникального идентификатора для каждого варианта товара
+    const variantId = `${product.id}_${selectedColor}_${selectedSize}`;
+
     const cartItem = {
-      id: product.id,
+      id: variantId, // Используем уникальный идентификатор
       name: product.name,
       photo: product.photo[0],
       price: product.price,
@@ -127,13 +142,61 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
     try {
       const cartRef = doc(db, "cart", user.uid);
       const cartSnap = await getDoc(cartRef);
-      await updateDoc(cartRef, {
-        items: arrayUnion(cartItem),
-      });
+      if (cartSnap.exists()) {
+        const currentItems = cartSnap.data().items || [];
+
+        // Проверка, есть ли уже такой же вариант в корзине
+        const existingItem = currentItems.find(
+          (item: CartItem) =>
+            item.id === cartItem.id &&
+            item.color === cartItem.color &&
+            item.size === cartItem.size
+        );
+
+        if (existingItem) {
+          // Если товар уже в корзине, обновляем количество
+          const updatedItems = currentItems.map((item: CartItem) =>
+            item.id === cartItem.id &&
+            item.color === cartItem.color &&
+            item.size === cartItem.size
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+          await updateDoc(cartRef, { items: updatedItems });
+        } else {
+          // Если товар отсутствует, добавляем его
+          await updateDoc(cartRef, {
+            items: arrayUnion(cartItem),
+          });
+        }
+      } else {
+        // Если корзина пуста, создаем ее с первым товаром
+        await setDoc(cartRef, { items: [cartItem] });
+      }
       message.success("Item added to cart!");
     } catch (error) {
       console.error("Error adding item to cart:", error);
       message.error("Error adding item to cart. Please try again.");
+    }
+  };
+
+  const handleRemoveFromCart = async (variantId: string) => {
+    if (!user) return;
+
+    try {
+      const cartRef = doc(db, "cart", user.uid);
+      const cartSnap = await getDoc(cartRef);
+      if (cartSnap.exists()) {
+        const currentItems = cartSnap.data().items || [];
+        const updatedItems = currentItems.filter(
+          (item: CartItem) => item.id !== variantId
+        );
+        await updateDoc(cartRef, { items: updatedItems });
+        message.success("Item removed from cart!");
+      }
+    } catch (error) {
+      console.error("Error removing item from cart:", error);
+      message.error("Error removing item from cart. Please try again.");
     }
   };
 
@@ -224,8 +287,8 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                 {["Small", "Medium", "Large", "X-Large"].map((size) => (
                   <button
                     key={size}
-                    className={`w-[100px] h-[46px] px-4 py-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 text-base ${
-                      size === selectedSize ? "bg-blue-500 text-white" : ""
+                    className={`w-[100px] h-[46px] px-4 py-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-[blue] hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 text-base ${
+                      size === selectedSize ? "bg-[blue] text-white" : ""
                     }`}
                     onClick={() => setSelectedSize(size)}
                   >
@@ -250,7 +313,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
               </div>
               <button
                 onClick={handleAddToCart}
-                className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-150 ease-in-out"
               >
                 Add to Cart
               </button>
@@ -261,11 +324,11 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
           <h2 className={`text-3xl font-bold mb-4 ${integralCF.className}`}>
             Related Products
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             {relatedProducts.map((item) => (
               <div
                 key={item.id}
-                className="overflow-hidden flex flex-col items-start justify-between gap-2 "
+                className="overflow-hidden flex flex-col items-start justify-between gap-2 hover:shadow-xl rounded-xl pb-4"
               >
                 <Link href={`/details/${item.id}`} className="cursor-pointer">
                   <Image
@@ -275,29 +338,31 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
                     height={294}
                     className="h-72"
                   />
-                </Link>
-                <h4 className="text-[20px] leading-[27px] font-bold text-black">
-                  {item.name}
-                </h4>
-                <div className="flex items-center ">
-                  <div className="rating pr-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <input
-                        key={star}
-                        type="radio"
-                        name={`rating-${item.id}`}
-                        className="mask mask-star-2 bg-orange-400"
-                        defaultChecked={item.rating >= star}
-                      />
-                    ))}
+                  <div className="pl-4 flex flex-col items-start justify-between gap-4">
+                    <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                      {item.name}
+                    </h4>
+                    <div className="flex items-center ">
+                      <div className="rating pr-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <input
+                            key={star}
+                            type="radio"
+                            name={`rating-${item.id}`}
+                            className="mask mask-star-2 bg-orange-400"
+                            defaultChecked={item.rating >= star}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-black">
+                        {item.rating}/<span className="text-gray-600">5</span>
+                      </p>
+                    </div>
+                    <h3 className="text-[24px] leading-[37px] font-bold">
+                      ${item.price}
+                    </h3>
                   </div>
-                  <p className="text-black">
-                    {item.rating}/<span className="text-gray-600">5</span>
-                  </p>
-                </div>
-                <h3 className="text-[24px] leading-[37px] font-bold">
-                  ${item.price}
-                </h3>
+                </Link>
               </div>
             ))}
           </div>

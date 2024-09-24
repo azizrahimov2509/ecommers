@@ -82,7 +82,7 @@ export default function SearchResults() {
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className={`flex flex-col items-start justify-center gap-3 ${satoshi.className} w-[290px]`}
+              className={`flex flex-col items-start justify-center gap-3 ${satoshi.className} w-[290px] hover:shadow-lg rounded-xl`}
             >
               <Link href={`/details/${product.id}`} className="cursor-pointer">
                 <Image
@@ -92,30 +92,32 @@ export default function SearchResults() {
                   height={294}
                   className="h-72 object-cover"
                 />
-              </Link>
-              <h4 className="text-[20px] leading-[27px] font-bold text-black">
-                {product.name}
-              </h4>
-              <div className="flex items-center justify-between w-full">
-                <div className="rating flex items-center">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <input
-                      key={star}
-                      type="radio"
-                      name={`rating-${product.id}`}
-                      className="mask mask-star-2 bg-orange-400"
-                      defaultChecked={product.rating >= star}
-                      readOnly
-                    />
-                  ))}
+                <div className="pl-4 flex flex-col items-start justify-between gap-4 ">
+                  <h4 className="text-[20px] leading-[27px] font-bold text-black">
+                    {product.name}
+                  </h4>
+                  <div className="flex items-center w-full">
+                    <div className="rating flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <input
+                          key={star}
+                          type="radio"
+                          name={`rating-${product.id}`}
+                          className="mask mask-star-2 bg-orange-400"
+                          defaultChecked={product.rating >= star}
+                          readOnly
+                        />
+                      ))}
+                    </div>
+                    <p className="text-black">
+                      {product.rating}/<span className="text-gray-600">5</span>
+                    </p>
+                  </div>
+                  <h3 className="text-[24px] leading-[37px] font-bold">
+                    ${product.price}
+                  </h3>
                 </div>
-                <p className="text-black">
-                  {product.rating}/<span className="text-gray-600">5</span>
-                </p>
-              </div>
-              <h3 className="text-[24px] leading-[37px] font-bold">
-                ${product.price}
-              </h3>
+              </Link>
             </div>
           ))}
         </div>
