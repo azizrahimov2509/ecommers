@@ -14,6 +14,7 @@ interface CartItem {
   price: number;
   quantity: number;
   color: string;
+  size: string; // Добавляем размер
 }
 
 const Cart: React.FC = () => {
@@ -35,10 +36,9 @@ const Cart: React.FC = () => {
       } else {
         const storedUser = JSON.parse(localStorage.getItem("user") || "null");
         if (storedUser) {
-          // Handle scenario when user data is available in localStorage but not in current session
           console.log("User data found in localStorage:", storedUser);
         }
-        setLoading(false); // Stop loading if there's no user
+        setLoading(false);
       }
     });
 
@@ -177,6 +177,7 @@ const Cart: React.FC = () => {
                 <div className="flex-grow px-4">
                   <h2 className="text-xl font-bold">{item.name}</h2>
                   <p>Color: {item.color}</p>
+                  <p>Size: {item.size}</p> {/* Добавляем отображение размера */}
                   <p>Quantity: {item.quantity}</p>
                 </div>
                 <div className="text-right">
