@@ -6,6 +6,12 @@ import Image from "next/image";
 import { message } from "antd";
 import loader from "../../../public/loader.gif";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import localFont from "next/font/local";
+
+const satoshi = localFont({
+  src: "../../fonts/satoshi/Satoshi-Variable.ttf",
+  display: "swap",
+});
 
 interface CartItem {
   id: string;
@@ -174,14 +180,28 @@ const Cart: React.FC = () => {
                   height={96}
                   className="object-cover"
                 />
-                <div className="flex-grow px-4">
+                <div className={`flex-grow px-4 ${satoshi.className} `}>
                   <h2 className="text-xl font-bold">{item.name}</h2>
-                  <p>Color: {item.color}</p>
-                  <p>Size: {item.size}</p> {/* Добавляем отображение размера */}
-                  <p>Quantity: {item.quantity}</p>
+                  <p className="font-bold">
+                    Color: <span className="font-medium">{item.color}</span>{" "}
+                    <span
+                      className="p-1 w-4 h-4 rounded-full inline-block"
+                      style={{ backgroundColor: item.color }}
+                    ></span>
+                  </p>
+                  <p className="font-bold">
+                    Size: <span className="font-medium">{item.size}</span>
+                  </p>{" "}
+                  {/* Добавляем отображение размера */}
+                  <p className="font-bold">
+                    Quantity:{" "}
+                    <span className="font-medium">{item.quantity}</span>
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold">${item.price}</p>
+                  <p className="text-xl font-bold">
+                    <span className="font-medium">${item.price}</span>
+                  </p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="flex w-[170px] h-[52px] gap-2 bg-slate-300 rounded-3xl p-3 items-center ml-3 justify-between">

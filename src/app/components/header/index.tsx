@@ -102,7 +102,7 @@ export default function Header() {
           <nav>
             <ul className={`flex space-x-4 items-center ${satoshi.className}`}>
               <li>
-                <Link href="/details">Shop</Link>
+                <Link href="/searchRes">Shop</Link>
               </li>
               <li>
                 <Link href="/details">On Sale</Link>

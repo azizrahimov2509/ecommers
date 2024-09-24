@@ -313,7 +313,7 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
               </div>
               <button
                 onClick={handleAddToCart}
-                className="w-full py-3btn  btn-primary mt-4"
+                className=" py-3 btn btn-block btn-primary mt-4"
               >
                 Add to Cart
               </button>
