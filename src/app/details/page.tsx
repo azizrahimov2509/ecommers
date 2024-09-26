@@ -14,6 +14,8 @@ import {
 } from "firebase/firestore";
 import { db } from "@/farebase/config";
 
+import loaderImage from "../../../public/loader.gif";
+
 const integralCF = localFont({
   src: "../../fonts/IntegralCF/IntegralCF-Bold.ttf",
   display: "swap",
@@ -35,18 +37,18 @@ interface Product {
 export default function Details() {
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [topSellings, setTopSellings] = useState<Product[]>([]);
-  const [newArrivalsAll, setNewArrivalsAll] = useState<Product[]>([]);
-  const [topSellingsAll, setTopSellingsAll] = useState<Product[]>([]);
   const [newArrivalsLastDoc, setNewArrivalsLastDoc] =
     useState<QueryDocumentSnapshot | null>(null);
   const [topSellingsLastDoc, setTopSellingsLastDoc] =
     useState<QueryDocumentSnapshot | null>(null);
+  const [loading, setLoading] = useState(true); // состояние для отслеживания загрузки
   const [loadingMore, setLoadingMore] = useState(false);
   const [showAllNewArrivals, setShowAllNewArrivals] = useState(false);
   const [showAllTopSellings, setShowAllTopSellings] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true); // начинаем загрузку
       try {
         const productsRef = collection(db, "products");
 
@@ -59,7 +61,6 @@ export default function Details() {
         })) as Product[];
 
         setNewArrivals(newArrivalsData);
-        setNewArrivalsAll(newArrivalsData);
         setNewArrivalsLastDoc(
           newArrivalsSnapshot.docs[newArrivalsSnapshot.docs.length - 1]
         );
@@ -79,12 +80,13 @@ export default function Details() {
         })) as Product[];
 
         setTopSellings(topSellingsData);
-        setTopSellingsAll(topSellingsData);
         setTopSellingsLastDoc(
           topSellingsSnapshot.docs[topSellingsSnapshot.docs.length - 1]
         );
       } catch (error) {
         console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false); // завершили загрузку
       }
     };
 
@@ -111,7 +113,6 @@ export default function Details() {
         })) as Product[];
 
         setNewArrivals((prev) => [...prev, ...newArrivalsData]);
-        setNewArrivalsAll((prev) => [...prev, ...newArrivalsData]);
         setNewArrivalsLastDoc(
           newArrivalsSnapshot.docs[newArrivalsSnapshot.docs.length - 1]
         );
@@ -130,7 +131,6 @@ export default function Details() {
         })) as Product[];
 
         setTopSellings((prev) => [...prev, ...topSellingsData]);
-        setTopSellingsAll((prev) => [...prev, ...topSellingsData]);
         setTopSellingsLastDoc(
           topSellingsSnapshot.docs[topSellingsSnapshot.docs.length - 1]
         );
@@ -141,6 +141,14 @@ export default function Details() {
       setLoadingMore(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center container mx-auto p-4">
+        <Image src={loaderImage} alt="Loading..." width={550} height={550} />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -153,7 +161,7 @@ export default function Details() {
               NEW ARRIVALS
             </h1>
             <div className="flex flex-wrap items-center justify-between gap-6">
-              {(showAllNewArrivals ? newArrivalsAll : newArrivals).map(
+              {(showAllNewArrivals ? newArrivals : newArrivals.slice(0, 4)).map(
                 (item) => (
                   <div
                     key={item.id}
@@ -174,7 +182,7 @@ export default function Details() {
                         <h4 className="text-[20px] leading-[27px] font-bold text-black">
                           {item.name}
                         </h4>
-                        <div className="flex items-center ">
+                        <div className="flex items-center">
                           <div className="rating">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <input
@@ -218,7 +226,6 @@ export default function Details() {
                 <button
                   onClick={() => {
                     setShowAllNewArrivals(false);
-                    setNewArrivals(newArrivals.slice(0, 4));
                   }}
                   className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500`}
                 >
@@ -230,6 +237,7 @@ export default function Details() {
           <hr />
         </div>
       </section>
+
       <section className="mt-24">
         <div className="container">
           <div className="flex flex-col items-center justify-between gap-11 mb-20">
@@ -239,7 +247,7 @@ export default function Details() {
               TOP SELLING
             </h1>
             <div className="flex flex-wrap items-center justify-between gap-6">
-              {(showAllTopSellings ? topSellingsAll : topSellings).map(
+              {(showAllTopSellings ? topSellings : topSellings.slice(0, 4)).map(
                 (item) => (
                   <div
                     key={item.id}
@@ -260,7 +268,7 @@ export default function Details() {
                         <h4 className="text-[20px] leading-[27px] font-bold text-black">
                           {item.name}
                         </h4>
-                        <div className="flex items-center ">
+                        <div className="flex items-center">
                           <div className="rating">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <input
@@ -304,7 +312,6 @@ export default function Details() {
                 <button
                   onClick={() => {
                     setShowAllTopSellings(false);
-                    setTopSellings(topSellings.slice(0, 4)); // Reset to initial state
                   }}
                   className={` ${satoshi.className} btn border-spacing-1 border-gray-200 rounded-3xl w-[218px] h-[52px] text-base leading-[21px] font-500`}
                 >
@@ -313,7 +320,6 @@ export default function Details() {
               </div>
             )}
           </div>
-          <hr />
         </div>
       </section>
     </>

@@ -10,6 +10,7 @@ interface SignUpData {
   email: string;
   password: string;
   displayName: string;
+  phoneNumber: string;
 }
 
 const SignUp: React.FC = () => {
@@ -18,10 +19,12 @@ const SignUp: React.FC = () => {
     email: "",
     password: "",
     displayName: "",
+    phoneNumber: "+998", // Предустановленный префикс номера телефона
   });
   const [errors, setErrors] = useState({
     email: "",
     password: "",
+    phoneNumber: "",
     firebase: "",
   });
 
@@ -34,9 +37,15 @@ const SignUp: React.FC = () => {
     return password.length >= 6;
   };
 
+  const validatePhoneNumber = (phoneNumber: string) => {
+    const re = /^\+998\d{9}$/; // Проверка на формат +998 и 9 цифр
+    return re.test(phoneNumber);
+  };
+
   const validateInputs = () => {
     let emailError = "";
     let passwordError = "";
+    let phoneNumberError = "";
 
     if (!validateEmail(signData.email)) {
       emailError = "Invalid email address.";
@@ -46,12 +55,22 @@ const SignUp: React.FC = () => {
       passwordError = "Password must be at least 6 characters long.";
     }
 
-    if (emailError || passwordError) {
-      setErrors({ email: emailError, password: passwordError, firebase: "" });
+    if (!validatePhoneNumber(signData.phoneNumber)) {
+      phoneNumberError =
+        "Phone number must be in format +998XXXXXXXXX (9 digits after +998).";
+    }
+
+    if (emailError || passwordError || phoneNumberError) {
+      setErrors({
+        email: emailError,
+        password: passwordError,
+        phoneNumber: phoneNumberError,
+        firebase: "",
+      });
       return false;
     }
 
-    setErrors({ email: "", password: "", firebase: "" });
+    setErrors({ email: "", password: "", phoneNumber: "", firebase: "" });
     return true;
   };
 
@@ -82,7 +101,8 @@ const SignUp: React.FC = () => {
           JSON.stringify({
             uid: user.uid,
             email: user.email,
-            displayName: signData.displayName, 
+            displayName: signData.displayName,
+            phoneNumber: signData.phoneNumber, // Сохраняем номер телефона
           })
         );
       }
@@ -147,6 +167,29 @@ const SignUp: React.FC = () => {
             setSignData({ ...signData, displayName: e.target.value })
           }
         />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-gray-700">Phone Number</label>
+        <input
+          type="text"
+          maxLength={13} // Ограничение на максимальную длину номера телефона (+998 + 9 цифр)
+          className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Phone Number"
+          value={signData.phoneNumber}
+          onChange={(e) => {
+            // Запрещаем пользователю удалять "+998"
+            if (
+              e.target.value.startsWith("+998") &&
+              e.target.value.length <= 13
+            ) {
+              setSignData({ ...signData, phoneNumber: e.target.value });
+            }
+          }}
+        />
+        {errors.phoneNumber && (
+          <p className="text-red-500 mt-1">{errors.phoneNumber}</p>
+        )}
       </div>
 
       {errors.firebase && (

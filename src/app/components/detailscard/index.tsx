@@ -20,6 +20,7 @@ import { getAuth } from "firebase/auth";
 import { db } from "@/farebase/config";
 import { useRouter } from "next/navigation";
 import { message } from "antd";
+import loaderImage from "../../../../public/loader.gif";
 
 const integralCF = localFont({
   src: "../../../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -223,7 +224,11 @@ const DetailsCars: React.FC<DetailsCarsProps> = ({ id }) => {
   };
 
   if (!product) {
-    return <div className="container">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center container mx-auto p-4">
+        <Image src={loaderImage} alt="Loading..." width={550} height={550} />
+      </div>
+    );
   }
 
   return (
