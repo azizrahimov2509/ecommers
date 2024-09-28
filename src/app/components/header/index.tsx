@@ -149,7 +149,7 @@ export default function Header() {
             </ul>
           </nav>
 
-          <div className="relative w-[577px]">
+          <div className="relative w-[500px]">
             <input
               type="text"
               placeholder="Search for products..."
@@ -173,7 +173,7 @@ export default function Header() {
             </svg>
           </div>
 
-          <div className="relative ml-4">
+          <div className="relative ml-4 ">
             <Link href="/card" className="indicator">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -194,6 +194,14 @@ export default function Header() {
                   {cartItemCount}
                 </span>
               )}
+            </Link>
+          </div>
+
+          <div>
+            <Link href="/orders" className="flex items-center">
+              <span className="text-lg font-semibold text-center ">
+                Ваш заказ
+              </span>
             </Link>
           </div>
 

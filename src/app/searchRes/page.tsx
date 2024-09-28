@@ -7,6 +7,7 @@ import localFont from "next/font/local";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/farebase/config";
 import Link from "next/link";
+import loaderImage from "../../../public/loader.gif";
 
 const integralCF = localFont({
   src: "../../fonts/IntegralCF/IntegralCF-Bold.ttf",
@@ -74,7 +75,9 @@ export default function SearchResults() {
         Search Results for "{queryParam}"
       </h1>
       {loading ? (
-        <p>Loading...</p>
+        <div className="flex items-center justify-center container mx-auto p-4">
+          <Image src={loaderImage} alt="Loading..." width={750} height={750} />
+        </div>
       ) : error ? (
         <p className="text-xl text-red-600">{error}</p>
       ) : filteredProducts.length > 0 ? (

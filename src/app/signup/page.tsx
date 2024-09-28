@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/farebase/config";
 import { message } from "antd";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/farebase/config"; // Импортируйте ваш Firestore конфиг
 
 interface SignUpData {
   email: string;
@@ -90,18 +92,25 @@ const SignUp: React.FC = () => {
 
       const user = userCredential.user;
 
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, {
+      if (user) {
+        await updateProfile(user, {
           displayName: signData.displayName,
+          // Убираем phoneNumber, так как он не поддерживается
         });
 
-        // Save the user's profile info to localStorage
+        // Сохраните информацию пользователя в Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          displayName: signData.displayName,
+          phoneNumber: signData.phoneNumber, // Сохраняем номер телефона
+        });
+
+        // Сохраните информацию о пользователе в localStorage
         localStorage.setItem(
           "user",
           JSON.stringify({
             uid: user.uid,
             email: user.email,
-            displayName: signData.displayName,
+            displayName: signData.displayName, // Сохраняем имя пользователя
             phoneNumber: signData.phoneNumber, // Сохраняем номер телефона
           })
         );
